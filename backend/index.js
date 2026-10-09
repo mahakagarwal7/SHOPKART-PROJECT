@@ -12,7 +12,6 @@ const port = 8081;
 
 const app = express();
 
-console.log('DB URL:', process.env.dbUrl && process.env.dbUrl.replace(/:.+@/, ':***@'));
 
 mongoose.connect(process.env.dbUrl).then(() =>{
     console.log("DB Connected Successfully");

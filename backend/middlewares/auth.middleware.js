@@ -6,7 +6,7 @@ const isAuthenticated = async(req,res,next) => {
         const token = req.cookies.token;
 
         if(!token){
-            return res.status(400).json({message : 'No token Found'});
+            return res.status(401).json({message : 'No token Found'});
         }
 
         const decoded = jwt.verify(token,process.env.jwt_secret);
