@@ -7,7 +7,7 @@ export default function Navbar(){
 
   const logout = async () => {
     try {
-      await api.post('/customers/logOut');
+      await api.post('/customers/logout');
     } catch (err) {
       // ignore
     } finally {
