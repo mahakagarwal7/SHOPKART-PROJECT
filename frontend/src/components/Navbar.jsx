@@ -1,26 +1,51 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
-export default function Navbar(){
+export default function Navbar() {
   const navigate = useNavigate();
 
-  const logout = async () => {
+  const handleLogout = async () => {
     try {
       await api.post('/customers/logout');
     } catch (err) {
-      // ignore
+      console.error('Logout error:', err);
     } finally {
       navigate('/login');
     }
   };
 
   return (
-    <nav style={{padding:10,display:'flex',gap:10}}>
-      <Link to="/register">Register</Link>
-      <Link to="/login">Login</Link>
-      <Link to="/home">Home</Link>
-      <button onClick={logout}>Logout</button>
-    </nav>
+    <header className="navbar">
+      <div className="navbar-container">
+        <Link to="/home" className="navbar-brand">
+          🛒 <span>ShopKart</span>
+        </Link>
+        <nav className="navbar-links">
+          <NavLink
+            to="/register"
+            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
+          >
+            Register
+          </NavLink>
+          <NavLink
+            to="/login"
+            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
+          >
+            Login
+          </NavLink>
+          <NavLink
+            to="/home"
+            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
+          >
+            Home
+          </NavLink>
+          <button type="button" onClick={handleLogout} className="btn-logout">
+            Logout
+          </button>
+        </nav>
+      </div>
+    </header>
   );
 }
+
