@@ -1,35 +1,49 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import customerRoutes from "./routes/customer.routes.js";
 import cookieParser from "cookie-parser";
+import customerRoutes from "./routes/customer.routes.js";
 
 dotenv.config();
 
-
-
-const port = 8081;
+const port = process.env.PORT || 8081;
+const dbUrl = process.env.MONGO_URI || process.env.dbUrl || process.env.DB_URL || "mongodb://127.0.0.1:27017/shopkart";
 
 const app = express();
 
-
-mongoose.connect(process.env.dbUrl).then(() =>{
-    console.log("DB Connected Successfully");
-}).catch((err)=>{
-    console.log(err);
-})
-    
-
+// Enable CORS for credentials (cookies) support
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin) {
+        res.header("Access-Control-Allow-Origin", origin);
+        res.header("Access-Control-Allow-Credentials", "true");
+        res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    }
+    if (req.method === "OPTIONS") {
+        return res.sendStatus(200);
+    }
+    next();
+});
 
 app.use(express.json());
 app.use(cookieParser());
-app.use('/customers',customerRoutes);
 
+mongoose.connect(dbUrl).then(() => {
+    console.log("DB Connected Successfully");
+}).catch((err) => {
+    console.error("DB Connection Error:", err.message || err);
+});
 
+app.use('/customers', customerRoutes);
 
-app.listen(port , ()=>{
-    console.log(`Server started at ${port}`);
-})
+app.get("/", (req, res) => {
+    res.json({ message: "ShopKart Customer Authentication Service is running" });
+});
+
+app.listen(port, () => {
+    console.log(`Server started at http://localhost:${port}`);
+});
 
 
 

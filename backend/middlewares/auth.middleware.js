@@ -1,36 +1,33 @@
-import jwt from 'jsonwebtoken'
-import Customer from '../models/customer.model.js'
+import jwt from "jsonwebtoken";
+import Customer from "../models/customer.model.js";
 
-const isAuthenticated = async(req,res,next) => {
-    try{
-        const token = req.cookies.token;
+const isAuthenticated = async (req, res, next) => {
+    try {
+        const token = req.cookies?.token;
 
-        if(!token){
-            return res.status(401).json({message : 'No token Found'});
+        if (!token) {
+            return res.status(401).json({ message: "Unauthorized: No token provided" });
         }
 
-        const decoded = jwt.verify(token,process.env.jwt_secret);
+        const secret = process.env.JWT_SECRET || process.env.jwt_secret || "shopkart_secret_key";
+        let decoded;
+        try {
+            decoded = jwt.verify(token, secret);
+        } catch (jwtError) {
+            return res.status(401).json({ message: "Unauthorized: Invalid or expired token" });
+        }
 
         const user = await Customer.findById(decoded.customerId);
-
-        console.log(decoded);
-
-        if(!user){
-            return res.status(404).json({message : "User not found"})
+        if (!user) {
+            return res.status(401).json({ message: "Unauthorized: Customer not found" });
         }
 
-        req.user = user
-        next()
-
-
-    }catch(error){
-        console.log(error);
-        return res.status(500).json({message : "Internal Server Error"})
+        req.user = user;
+        next();
+    } catch (error) {
+        console.error("Auth Middleware Error:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
 
-export default isAuthenticated
-
-
-
-
+export default isAuthenticated;
