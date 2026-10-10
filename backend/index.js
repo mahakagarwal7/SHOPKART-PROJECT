@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import customerRoutes from "./routes/customer.routes.js";
+import productRoutes from "./routes/product.routes.js";
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ mongoose.connect(dbUrl).then(() => {
 });
 
 app.use('/customers', customerRoutes);
+app.use('/products', productRoutes);
 
 app.get("/", (req, res) => {
     res.json({ message: "ShopKart Customer Authentication Service is running" });
