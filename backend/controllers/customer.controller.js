@@ -13,21 +13,21 @@ export const registerUser = async (req, res) => {
     try {
         const { fullName, email, password, phone } = req.body;
 
-        // Validation: All fields are mandatory (Status 400)
+      
         if (!fullName || !email || !password || !phone) {
             return res.status(400).json({
                 message: "All fields are required"
             });
         }
 
-        // Validation: Password must contain at least 6 characters (Status 400)
+        
         if (password.length < 6) {
             return res.status(400).json({
                 message: "Password must be at least 6 characters"
             });
         }
 
-        // Validation: Email must be unique (Status 409)
+
         const emailExists = await Customer.findOne({ email: email.toLowerCase().trim() });
         if (emailExists) {
             return res.status(409).json({
@@ -35,11 +35,11 @@ export const registerUser = async (req, res) => {
             });
         }
 
-        // Hash password using bcrypt
+      
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Save customer to database
+    
         const newCustomer = await Customer.create({
             fullName: fullName.trim(),
             email: email.toLowerCase().trim(),
@@ -47,7 +47,7 @@ export const registerUser = async (req, res) => {
             phone: phone.trim()
         });
 
-        // Return customer info excluding password
+        
         return res.status(201).json({
             success: true,
             message: "Customer registered successfully",
