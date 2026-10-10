@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useCart } from '../context/CartContext';
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { totalItems } = useCart();
   const [wishlistCount, setWishlistCount] = useState(null);
 
   // Fetch dynamic wishlist count from backend (Bonus Challenge +5 Marks)
@@ -72,6 +74,12 @@ export default function Navbar() {
             className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
           >
             Wishlist {wishlistCount !== null && wishlistCount > 0 ? `(${wishlistCount})` : ''}
+          </NavLink>
+          <NavLink
+            to="/cart"
+            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
+          >
+            Cart {totalItems > 0 ? `(${totalItems})` : ''}
           </NavLink>
           <button type="button" onClick={handleLogout} className="btn-logout">
             Logout
