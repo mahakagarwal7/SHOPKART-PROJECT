@@ -1,8 +1,55 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, initialWishlisted = false, onWishlistChange }) {
+  const [isWishlisted, setIsWishlisted] = useState(initialWishlisted);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
+
   const isOutOfStock = product.stock <= 0;
+
+  const handleWishlistClick = async (e) => {
+    e.preventDefault();
+    if (loading) return; // Prevent duplicate requests while saving
+
+    setLoading(true);
+    setMessage('');
+
+    try {
+      if (isWishlisted) {
+        // Remove from wishlist
+        await api.delete(`/wishlist/${product._id}`);
+        setIsWishlisted(false);
+        setMessage('Removed from Wishlist');
+        if (onWishlistChange) onWishlistChange(product._id, false);
+      } else {
+        // Add to wishlist
+        await api.post(`/wishlist/${product._id}`);
+        setIsWishlisted(true);
+        setMessage('Added to Wishlist');
+        if (onWishlistChange) onWishlistChange(product._id, true);
+      }
+    } catch (err) {
+      if (err.response?.status === 401) {
+        // Not authenticated -> redirect to login
+        navigate('/login');
+      } else if (err.response?.status === 409) {
+        // Already in wishlist
+        setIsWishlisted(true);
+        setMessage('Already in Wishlist');
+      } else {
+        setMessage('Unable to save product. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+      // Auto-clear notification message after 3 seconds
+      setTimeout(() => {
+        setMessage('');
+      }, 3000);
+    }
+  };
 
   return (
     <div className="product-card">
@@ -12,12 +59,23 @@ export default function ProductCard({ product }) {
           alt={product.name}
           className="product-image"
           onError={(e) => {
-            // Fallback placeholder image if URL fails
             e.target.onerror = null;
             e.target.src = 'https://placehold.co/400x300?text=Product+Image';
           }}
         />
         <span className="product-category-badge">{product.category}</span>
+
+        {/* Heart Icon Button overlay on image */}
+        <button
+          type="button"
+          onClick={handleWishlistClick}
+          disabled={loading}
+          className={`wishlist-heart-btn ${isWishlisted ? 'active' : ''}`}
+          title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
+          aria-label="Wishlist toggle"
+        >
+          {loading ? '⏳' : isWishlisted ? '❤️' : '🤍'}
+        </button>
       </div>
 
       <div className="product-info">
@@ -37,9 +95,29 @@ export default function ProductCard({ product }) {
           )}
         </div>
 
-        <Link to={`/products/${product._id}`} className="btn-view-details">
-          View Details
-        </Link>
+        {message && (
+          <div
+            className={`wishlist-card-feedback ${
+              message.includes('Unable') ? 'feedback-error' : 'feedback-success'
+            }`}
+          >
+            {message}
+          </div>
+        )}
+
+        <div className="product-card-actions">
+          <Link to={`/products/${product._id}`} className="btn-view-details">
+            View Details
+          </Link>
+          <button
+            type="button"
+            onClick={handleWishlistClick}
+            disabled={loading}
+            className={`btn-card-wishlist ${isWishlisted ? 'wishlisted' : ''}`}
+          >
+            {loading ? '⏳ Saving...' : isWishlisted ? '♥ In Wishlist' : '♡ Wishlist'}
+          </button>
+        </div>
       </div>
     </div>
   );

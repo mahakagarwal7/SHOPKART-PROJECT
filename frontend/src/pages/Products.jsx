@@ -11,6 +11,22 @@ export default function Products() {
   const [category, setCategory] = useState('');
   const [sort, setSort] = useState('');
   const [categories, setCategories] = useState(['Electronics', 'Fashion', 'Books', 'Home']);
+  const [wishlistIds, setWishlistIds] = useState(new Set());
+
+  // Fetch user wishlist to identify saved products
+  useEffect(() => {
+    api
+      .get('/wishlist')
+      .then((res) => {
+        if (res.data?.wishlist) {
+          const ids = new Set(res.data.wishlist.map((item) => item._id));
+          setWishlistIds(ids);
+        }
+      })
+      .catch(() => {
+        // Unauthenticated or error -> empty set
+      });
+  }, []);
 
   // Fetch available distinct categories from API if available
   useEffect(() => {
@@ -110,7 +126,19 @@ export default function Products() {
       ) : (
         <div className="products-grid">
           {products.map((product) => (
-            <ProductCard key={product._id} product={product} />
+            <ProductCard
+              key={product._id}
+              product={product}
+              initialWishlisted={wishlistIds.has(product._id)}
+              onWishlistChange={(id, isSaved) => {
+                setWishlistIds((prev) => {
+                  const updated = new Set(prev);
+                  if (isSaved) updated.add(id);
+                  else updated.delete(id);
+                  return updated;
+                });
+              }}
+            />
           ))}
         </div>
       )}

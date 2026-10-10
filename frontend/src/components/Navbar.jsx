@@ -1,9 +1,30 @@
-import React from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [wishlistCount, setWishlistCount] = useState(null);
+
+  // Fetch dynamic wishlist count from backend (Bonus Challenge +5 Marks)
+  useEffect(() => {
+    let mounted = true;
+    api
+      .get('/wishlist/count')
+      .then((res) => {
+        if (mounted && res.data?.success && typeof res.data.count === 'number') {
+          setWishlistCount(res.data.count);
+        }
+      })
+      .catch(() => {
+        if (mounted) setWishlistCount(null);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [location.pathname]);
 
   const handleLogout = async () => {
     try {
@@ -46,6 +67,12 @@ export default function Navbar() {
           >
             Products
           </NavLink>
+          <NavLink
+            to="/wishlist"
+            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
+          >
+            Wishlist {wishlistCount !== null && wishlistCount > 0 ? `(${wishlistCount})` : ''}
+          </NavLink>
           <button type="button" onClick={handleLogout} className="btn-logout">
             Logout
           </button>
@@ -54,4 +81,3 @@ export default function Navbar() {
     </header>
   );
 }
-

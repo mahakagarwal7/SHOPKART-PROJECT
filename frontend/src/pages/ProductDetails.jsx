@@ -9,17 +9,20 @@ export default function ProductDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [addedNotice, setAddedNotice] = useState(false);
+  const [wishlisted, setWishlisted] = useState(false);
+  const [savingWishlist, setSavingWishlist] = useState(false);
+  const [wishlistNotice, setWishlistNotice] = useState('');
 
   useEffect(() => {
     let mounted = true;
     setLoading(true);
     setError('');
 
+    // Fetch product details
     api
       .get(`/products/${id}`)
       .then((res) => {
         if (mounted) {
-          // res.data.product or res.data
           setProduct(res.data?.product || res.data);
           setLoading(false);
         }
@@ -38,6 +41,17 @@ export default function ProductDetails() {
         }
       });
 
+    // Check if this product is already in user's wishlist
+    api
+      .get('/wishlist')
+      .then((res) => {
+        if (mounted && res.data?.wishlist) {
+          const isSaved = res.data.wishlist.some((item) => item._id === id);
+          setWishlisted(isSaved);
+        }
+      })
+      .catch(() => {});
+
     return () => {
       mounted = false;
     };
@@ -48,6 +62,36 @@ export default function ProductDetails() {
     setTimeout(() => {
       setAddedNotice(false);
     }, 3000);
+  };
+
+  const handleToggleWishlist = async () => {
+    if (savingWishlist) return;
+    setSavingWishlist(true);
+    setWishlistNotice('');
+
+    try {
+      if (wishlisted) {
+        await api.delete(`/wishlist/${id}`);
+        setWishlisted(false);
+        setWishlistNotice('Removed from wishlist');
+      } else {
+        await api.post(`/wishlist/${id}`);
+        setWishlisted(true);
+        setWishlistNotice('Added to wishlist ❤️');
+      }
+    } catch (err) {
+      if (err.response?.status === 401) {
+        navigate('/login');
+      } else if (err.response?.status === 409) {
+        setWishlisted(true);
+        setWishlistNotice('Already in wishlist ❤️');
+      } else {
+        setWishlistNotice('Unable to update wishlist. Please try again.');
+      }
+    } finally {
+      setSavingWishlist(false);
+      setTimeout(() => setWishlistNotice(''), 3000);
+    }
   };
 
   if (loading) {
@@ -121,14 +165,41 @@ export default function ProductDetails() {
           </div>
 
           <div className="details-actions">
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              disabled={isOutOfStock}
-              className={`btn-add-to-cart ${isOutOfStock ? 'disabled' : ''}`}
-            >
-              🛒 {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
-            </button>
+            <div className="details-action-buttons">
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={isOutOfStock}
+                className={`btn-add-to-cart ${isOutOfStock ? 'disabled' : ''}`}
+              >
+                🛒 {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleToggleWishlist}
+                disabled={savingWishlist}
+                className={`btn-details-wishlist ${wishlisted ? 'active' : ''}`}
+              >
+                {savingWishlist
+                  ? '⏳ Saving...'
+                  : wishlisted
+                  ? '❤️ Saved in Wishlist'
+                  : '♡ Add to Wishlist'}
+              </button>
+            </div>
+
+            {wishlistNotice && (
+              <div
+                className={`alert ${
+                  wishlistNotice.includes('Unable') ? 'alert-error' : 'alert-success'
+                }`}
+                style={{ marginTop: '1rem' }}
+              >
+                <span>ℹ️</span>
+                <span>{wishlistNotice}</span>
+              </div>
+            )}
 
             {addedNotice && (
               <div className="alert alert-success" style={{ marginTop: '1rem' }}>
