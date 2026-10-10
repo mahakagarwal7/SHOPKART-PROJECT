@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import customerRoutes from "./routes/customer.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import wishlistRoutes from "./routes/wishlist.routes.js";
+import cartRoutes from "./routes/cart.routes.js";
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ mongoose.connect(dbUrl).then(() => {
 app.use('/customers', customerRoutes);
 app.use('/products', productRoutes);
 app.use('/wishlist', wishlistRoutes);
+app.use('/cart', cartRoutes);
 
 app.get("/", (req, res) => {
     res.json({ message: "ShopKart Customer Authentication Service is running" });
