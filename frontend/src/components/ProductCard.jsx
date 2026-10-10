@@ -1,14 +1,37 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useCart } from '../context/CartContext';
 
 export default function ProductCard({ product, initialWishlisted = false, onWishlistChange }) {
   const [isWishlisted, setIsWishlisted] = useState(initialWishlisted);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
+  const { addToCart, isInCart, actionLoadingId } = useCart();
 
   const isOutOfStock = product.stock <= 0;
+  const isCartLoading = actionLoadingId === product._id;
+  const inCart = isInCart(product._id);
+
+  const handleAddToCart = async (e) => {
+    e.preventDefault();
+    if (isOutOfStock || isCartLoading) return;
+
+    setMessage('');
+    const res = await addToCart(product._id);
+    if (res.status === 401) {
+      navigate('/login');
+    } else if (res.success) {
+      setMessage('Added to cart! 🛒');
+    } else {
+      setMessage(res.message || 'Unable to add to cart.');
+    }
+
+    setTimeout(() => {
+      setMessage('');
+    }, 3000);
+  };
 
   const handleWishlistClick = async (e) => {
     e.preventDefault();
@@ -28,7 +51,7 @@ export default function ProductCard({ product, initialWishlisted = false, onWish
         // Add to wishlist
         await api.post(`/wishlist/${product._id}`);
         setIsWishlisted(true);
-        setMessage('Added to Wishlist');
+        setMessage('Added to Wishlist ❤️');
         if (onWishlistChange) onWishlistChange(product._id, true);
       }
     } catch (err) {
@@ -38,7 +61,7 @@ export default function ProductCard({ product, initialWishlisted = false, onWish
       } else if (err.response?.status === 409) {
         // Already in wishlist
         setIsWishlisted(true);
-        setMessage('Already in Wishlist');
+        setMessage('Already in Wishlist ❤️');
       } else {
         setMessage('Unable to save product. Please try again.');
       }
@@ -98,7 +121,9 @@ export default function ProductCard({ product, initialWishlisted = false, onWish
         {message && (
           <div
             className={`wishlist-card-feedback ${
-              message.includes('Unable') ? 'feedback-error' : 'feedback-success'
+              message.includes('Unable') || message.includes('failed')
+                ? 'feedback-error'
+                : 'feedback-success'
             }`}
           >
             {message}
@@ -106,17 +131,34 @@ export default function ProductCard({ product, initialWishlisted = false, onWish
         )}
 
         <div className="product-card-actions">
-          <Link to={`/products/${product._id}`} className="btn-view-details">
-            View Details
-          </Link>
           <button
             type="button"
-            onClick={handleWishlistClick}
-            disabled={loading}
-            className={`btn-card-wishlist ${isWishlisted ? 'wishlisted' : ''}`}
+            onClick={handleAddToCart}
+            disabled={isOutOfStock || isCartLoading}
+            className={`btn-card-add-cart ${inCart ? 'in-cart' : ''}`}
           >
-            {loading ? '⏳ Saving...' : isWishlisted ? '♥ In Wishlist' : '♡ Wishlist'}
+            {isOutOfStock
+              ? 'Out of Stock'
+              : isCartLoading
+              ? '⏳ Adding...'
+              : inCart
+              ? '🛒 Add Another'
+              : '🛒 Add to Cart'}
           </button>
+
+          <div className="product-card-subactions">
+            <Link to={`/products/${product._id}`} className="btn-view-details">
+              Details
+            </Link>
+            <button
+              type="button"
+              onClick={handleWishlistClick}
+              disabled={loading}
+              className={`btn-card-wishlist ${isWishlisted ? 'wishlisted' : ''}`}
+            >
+              {loading ? '⏳' : isWishlisted ? '♥ Saved' : '♡ Wishlist'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useCart } from '../context/CartContext';
 
 export default function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addToCart, isInCart, actionLoadingId } = useCart();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [addedNotice, setAddedNotice] = useState(false);
+  const [cartNotice, setCartNotice] = useState('');
   const [wishlisted, setWishlisted] = useState(false);
   const [savingWishlist, setSavingWishlist] = useState(false);
   const [wishlistNotice, setWishlistNotice] = useState('');
+
+  const isAddingToCart = actionLoadingId === id;
+  const inCart = isInCart(id);
 
   useEffect(() => {
     let mounted = true;
@@ -57,10 +62,21 @@ export default function ProductDetails() {
     };
   }, [id]);
 
-  const handleAddToCart = () => {
-    setAddedNotice(true);
+  const handleAddToCart = async () => {
+    if (isOutOfStock || isAddingToCart) return;
+    setCartNotice('');
+
+    const res = await addToCart(id);
+    if (res.status === 401) {
+      navigate('/login');
+    } else if (res.success) {
+      setCartNotice('Added to cart! 🛒');
+    } else {
+      setCartNotice(res.message || 'Unable to add to cart.');
+    }
+
     setTimeout(() => {
-      setAddedNotice(false);
+      setCartNotice('');
     }, 3000);
   };
 
@@ -169,10 +185,16 @@ export default function ProductDetails() {
               <button
                 type="button"
                 onClick={handleAddToCart}
-                disabled={isOutOfStock}
+                disabled={isOutOfStock || isAddingToCart}
                 className={`btn-add-to-cart ${isOutOfStock ? 'disabled' : ''}`}
               >
-                🛒 {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                {isOutOfStock
+                  ? 'Out of Stock'
+                  : isAddingToCart
+                  ? '⏳ Adding to Cart...'
+                  : inCart
+                  ? '🛒 Add Another'
+                  : '🛒 Add to Cart'}
               </button>
 
               <button
@@ -189,6 +211,20 @@ export default function ProductDetails() {
               </button>
             </div>
 
+            {cartNotice && (
+              <div
+                className={`alert ${
+                  cartNotice.includes('Unable') || cartNotice.includes('failed')
+                    ? 'alert-error'
+                    : 'alert-success'
+                }`}
+                style={{ marginTop: '1rem' }}
+              >
+                <span>{cartNotice.includes('Unable') ? '⚠️' : '✅'}</span>
+                <span>{cartNotice}</span>
+              </div>
+            )}
+
             {wishlistNotice && (
               <div
                 className={`alert ${
@@ -198,13 +234,6 @@ export default function ProductDetails() {
               >
                 <span>ℹ️</span>
                 <span>{wishlistNotice}</span>
-              </div>
-            )}
-
-            {addedNotice && (
-              <div className="alert alert-success" style={{ marginTop: '1rem' }}>
-                <span>✅</span>
-                <span>Added to cart! (Cart functionality will be introduced in Lab 04)</span>
               </div>
             )}
           </div>
