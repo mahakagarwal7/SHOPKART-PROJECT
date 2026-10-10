@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import customerRoutes from "./routes/customer.routes.js";
 import productRoutes from "./routes/product.routes.js";
+import wishlistRoutes from "./routes/wishlist.routes.js";
 
 dotenv.config();
 
@@ -12,7 +13,7 @@ const dbUrl = process.env.MONGO_URI || process.env.dbUrl || process.env.DB_URL |
 
 const app = express();
 
-// Enable CORS for credentials (cookies) support
+
 app.use((req, res, next) => {
     const origin = req.headers.origin;
     if (origin) {
@@ -38,6 +39,7 @@ mongoose.connect(dbUrl).then(() => {
 
 app.use('/customers', customerRoutes);
 app.use('/products', productRoutes);
+app.use('/wishlist', wishlistRoutes);
 
 app.get("/", (req, res) => {
     res.json({ message: "ShopKart Customer Authentication Service is running" });
