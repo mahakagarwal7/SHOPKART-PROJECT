@@ -7,6 +7,7 @@ export default function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, isInCart, actionLoadingId } = useCart();
+
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -63,21 +64,21 @@ export default function ProductDetails() {
   }, [id]);
 
   const handleAddToCart = async () => {
-    if (isOutOfStock || isAddingToCart) return;
+    if (product.stock <= 0 || isAddingToCart) return;
     setCartNotice('');
 
     const res = await addToCart(id);
     if (res.status === 401) {
       navigate('/login');
     } else if (res.success) {
-      setCartNotice('Added to cart! 🛒');
+      setCartNotice('Item added to your shopping bag! 🛍️');
     } else {
       setCartNotice(res.message || 'Unable to add to cart.');
     }
 
     setTimeout(() => {
       setCartNotice('');
-    }, 3000);
+    }, 3200);
   };
 
   const handleToggleWishlist = async () => {
@@ -102,7 +103,7 @@ export default function ProductDetails() {
         setWishlisted(true);
         setWishlistNotice('Already in wishlist ❤️');
       } else {
-        setWishlistNotice('Unable to update wishlist. Please try again.');
+        setWishlistNotice('Unable to update wishlist.');
       }
     } finally {
       setSavingWishlist(false);
@@ -112,22 +113,24 @@ export default function ProductDetails() {
 
   if (loading) {
     return (
-      <div className="state-container loading-state">
-        <div className="spinner"></div>
-        <p>Loading product details...</p>
+      <div className="storefront-container" style={{ padding: '4rem 1.5rem' }}>
+        <div className="state-container loading-state">
+          <div className="spinner"></div>
+          <p>Loading product details...</p>
+        </div>
       </div>
     );
   }
 
   if (error || !product) {
     return (
-      <div className="details-container">
+      <div className="storefront-container" style={{ padding: '4rem 1.5rem' }}>
         <div className="state-container error-state">
           <div className="state-icon">⚠️</div>
           <h2>Unable to Load Product</h2>
           <p>{error || 'Product not found.'}</p>
           <Link to="/products" className="btn-back">
-            ← Back to Products
+            ← Back to Catalog
           </Link>
         </div>
       </div>
@@ -137,80 +140,70 @@ export default function ProductDetails() {
   const isOutOfStock = product.stock <= 0;
 
   return (
-    <div className="details-container">
-      <div className="details-navigation">
-        <Link to="/products" className="btn-back-link">
-          ← Back to All Products
-        </Link>
-      </div>
-
-      <div className="details-card">
-        <div className="details-image-section">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="details-image"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = 'https://placehold.co/600x500?text=Product+Image';
-            }}
-          />
+    <div className="storefront-details-page">
+      <div className="storefront-container">
+        {/* Breadcrumb Navigation */}
+        <div className="details-breadcrumbs">
+          <Link to="/home">Home</Link>
+          <span>/</span>
+          <Link to="/products">Catalog</Link>
+          <span>/</span>
+          <Link to={`/products?category=${product.category}`}>{product.category}</Link>
+          <span>/</span>
+          <span className="current-crumb">{product.name}</span>
         </div>
 
-        <div className="details-content-section">
-          <span className="details-category-badge">{product.category}</span>
-          <h1 className="details-title">{product.name}</h1>
-
-          <div className="details-price">
-            ₹{Number(product.price).toLocaleString('en-IN')}
+        {/* 2-Column Product Showcase Card */}
+        <div className="storefront-details-card">
+          {/* Left Column: Visual Showcase */}
+          <div className="details-visual-col">
+            <div className="details-image-frame">
+              <img
+                src={product.image}
+                alt={product.name}
+                className="details-hero-img"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=700&auto=format&fit=crop';
+                }}
+              />
+              <span className="details-category-tag">{product.category}</span>
+            </div>
           </div>
 
-          <div className="details-stock-status">
-            {isOutOfStock ? (
-              <span className="stock-badge stock-badge-out">Out of Stock</span>
-            ) : (
-              <span className="stock-badge stock-badge-in">
-                In Stock ({product.stock} units available)
-              </span>
-            )}
-          </div>
-
-          <div className="details-description-block">
-            <h3>Description</h3>
-            <p>{product.description}</p>
-          </div>
-
-          <div className="details-actions">
-            <div className="details-action-buttons">
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                disabled={isOutOfStock || isAddingToCart}
-                className={`btn-add-to-cart ${isOutOfStock ? 'disabled' : ''}`}
-              >
-                {isOutOfStock
-                  ? 'Out of Stock'
-                  : isAddingToCart
-                  ? '⏳ Adding to Cart...'
-                  : inCart
-                  ? '🛒 Add Another'
-                  : '🛒 Add to Cart'}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleToggleWishlist}
-                disabled={savingWishlist}
-                className={`btn-details-wishlist ${wishlisted ? 'active' : ''}`}
-              >
-                {savingWishlist
-                  ? '⏳ Saving...'
-                  : wishlisted
-                  ? '❤️ Saved in Wishlist'
-                  : '♡ Add to Wishlist'}
-              </button>
+          {/* Right Column: Information & Actions */}
+          <div className="details-info-col">
+            <div className="details-rating-strip">
+              <span className="star-rating">★★★★★</span>
+              <span className="rating-score">4.9 / 5.0</span>
+              <span className="rating-count">• 128 Customer Reviews</span>
             </div>
 
+            <h1 className="details-title-heading">{product.name}</h1>
+
+            <div className="details-price-row">
+              <span className="details-price-tag">
+                ₹{Number(product.price).toLocaleString('en-IN')}
+              </span>
+              <span className="tax-inclusive-tag">Inclusive of all taxes</span>
+            </div>
+
+            <div className="details-stock-status-row">
+              {isOutOfStock ? (
+                <span className="status-pill pill-out">Out of Stock</span>
+              ) : (
+                <span className="status-pill pill-in">
+                  ✓ In Stock ({product.stock} units available)
+                </span>
+              )}
+            </div>
+
+            <div className="details-description-box">
+              <h3>Product Overview</h3>
+              <p>{product.description}</p>
+            </div>
+
+            {/* Notification Alerts */}
             {cartNotice && (
               <div
                 className={`alert ${
@@ -218,7 +211,6 @@ export default function ProductDetails() {
                     ? 'alert-error'
                     : 'alert-success'
                 }`}
-                style={{ marginTop: '1rem' }}
               >
                 <span>{cartNotice.includes('Unable') ? '⚠️' : '✅'}</span>
                 <span>{cartNotice}</span>
@@ -226,16 +218,58 @@ export default function ProductDetails() {
             )}
 
             {wishlistNotice && (
-              <div
-                className={`alert ${
-                  wishlistNotice.includes('Unable') ? 'alert-error' : 'alert-success'
-                }`}
-                style={{ marginTop: '1rem' }}
-              >
+              <div className="alert alert-info">
                 <span>ℹ️</span>
                 <span>{wishlistNotice}</span>
               </div>
             )}
+
+            {/* Action Buttons */}
+            <div className="details-action-buttons-group">
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={isOutOfStock || isAddingToCart}
+                className={`btn-details-primary-cart ${isOutOfStock ? 'disabled' : ''}`}
+              >
+                {isOutOfStock
+                  ? 'Out of Stock'
+                  : isAddingToCart
+                  ? '⏳ Adding to Bag...'
+                  : inCart
+                  ? '🛍️ In Bag (Add Another)'
+                  : '🛍️ Add to Shopping Bag'}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleToggleWishlist}
+                disabled={savingWishlist}
+                className={`btn-details-wishlist-toggle ${wishlisted ? 'is-saved' : ''}`}
+              >
+                {savingWishlist
+                  ? '⏳ Saving...'
+                  : wishlisted
+                  ? '❤️ Saved in Wishlist'
+                  : '🤍 Save to Wishlist'}
+              </button>
+            </div>
+
+            {/* Reassurance Value Perks */}
+            <div className="details-perks-checklist">
+              <div className="checklist-item">
+                <span>🚚</span>
+                <span>Fast express delivery across all pin codes in India</span>
+              </div>
+              <div className="checklist-item">
+                <span>💳</span>
+                <span>100% Secure Checkout powered by Razorpay Test Mode</span>
+              </div>
+              <div className="checklist-item">
+                <span>↩️</span>
+                <span>Easy 30-day hassle-free replacement warranty</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

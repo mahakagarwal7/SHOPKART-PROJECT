@@ -5,8 +5,8 @@ import { useCart } from '../context/CartContext';
 
 export default function ProductCard({ product, initialWishlisted = false, onWishlistChange }) {
   const [isWishlisted, setIsWishlisted] = useState(initialWishlisted);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [loadingWishlist, setLoadingWishlist] = useState(false);
+  const [feedbackMsg, setFeedbackMsg] = useState('');
   const navigate = useNavigate();
   const { addToCart, isInCart, actionLoadingId } = useCart();
 
@@ -16,149 +16,161 @@ export default function ProductCard({ product, initialWishlisted = false, onWish
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
     if (isOutOfStock || isCartLoading) return;
 
-    setMessage('');
+    setFeedbackMsg('');
     const res = await addToCart(product._id);
     if (res.status === 401) {
       navigate('/login');
     } else if (res.success) {
-      setMessage('Added to cart! 🛒');
+      setFeedbackMsg('Added to bag! 🛍️');
     } else {
-      setMessage(res.message || 'Unable to add to cart.');
+      setFeedbackMsg(res.message || 'Unable to add to cart.');
     }
 
     setTimeout(() => {
-      setMessage('');
-    }, 3000);
+      setFeedbackMsg('');
+    }, 2800);
   };
 
-  const handleWishlistClick = async (e) => {
+  const handleWishlistToggle = async (e) => {
     e.preventDefault();
-    if (loading) return; // Prevent duplicate requests while saving
+    e.stopPropagation();
+    if (loadingWishlist) return;
 
-    setLoading(true);
-    setMessage('');
+    setLoadingWishlist(true);
+    setFeedbackMsg('');
 
     try {
       if (isWishlisted) {
-        // Remove from wishlist
         await api.delete(`/wishlist/${product._id}`);
         setIsWishlisted(false);
-        setMessage('Removed from Wishlist');
+        setFeedbackMsg('Removed from wishlist');
         if (onWishlistChange) onWishlistChange(product._id, false);
       } else {
-        // Add to wishlist
         await api.post(`/wishlist/${product._id}`);
         setIsWishlisted(true);
-        setMessage('Added to Wishlist ❤️');
+        setFeedbackMsg('Saved to wishlist ❤️');
         if (onWishlistChange) onWishlistChange(product._id, true);
       }
     } catch (err) {
       if (err.response?.status === 401) {
-        // Not authenticated -> redirect to login
         navigate('/login');
       } else if (err.response?.status === 409) {
-        // Already in wishlist
         setIsWishlisted(true);
-        setMessage('Already in Wishlist ❤️');
+        setFeedbackMsg('Already in wishlist ❤️');
       } else {
-        setMessage('Unable to save product. Please try again.');
+        setFeedbackMsg('Unable to update wishlist.');
       }
     } finally {
-      setLoading(false);
-      // Auto-clear notification message after 3 seconds
-      setTimeout(() => {
-        setMessage('');
-      }, 3000);
+      setLoadingWishlist(false);
+      setTimeout(() => setFeedbackMsg(''), 2800);
     }
   };
 
   return (
-    <div className="product-card">
-      <div className="product-image-container">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="product-image"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = 'https://placehold.co/400x300?text=Product+Image';
-          }}
-        />
-        <span className="product-category-badge">{product.category}</span>
+    <div className="storefront-product-card group">
+      {/* Product Image Stage */}
+      <div className="card-image-stage">
+        <Link to={`/products/${product._id}`} className="image-stage-link">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="product-main-img"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=500&auto=format&fit=crop';
+            }}
+          />
+        </Link>
 
-        {/* Heart Icon Button overlay on image */}
-        <button
-          type="button"
-          onClick={handleWishlistClick}
-          disabled={loading}
-          className={`wishlist-heart-btn ${isWishlisted ? 'active' : ''}`}
-          title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
-          aria-label="Wishlist toggle"
-        >
-          {loading ? '⏳' : isWishlisted ? '❤️' : '🤍'}
-        </button>
+        {/* Top Badges */}
+        <div className="stage-top-overlay">
+          {product.stock <= 5 && !isOutOfStock ? (
+            <span className="stage-badge badge-warning">⚡ Low Stock</span>
+          ) : isOutOfStock ? (
+            <span className="stage-badge badge-danger">Out of Stock</span>
+          ) : (
+            <span className="stage-badge badge-trending">🔥 Trending</span>
+          )}
+
+          {/* Floating Heart Wishlist Button */}
+          <button
+            type="button"
+            onClick={handleWishlistToggle}
+            disabled={loadingWishlist}
+            className={`stage-heart-btn ${isWishlisted ? 'heart-active' : ''}`}
+            title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
+            aria-label="Wishlist toggle"
+          >
+            {loadingWishlist ? '⏳' : isWishlisted ? '❤️' : '🤍'}
+          </button>
+        </div>
+
+        {/* Quick View Floating Overlay on Hover */}
+        <div className="stage-hover-overlay">
+          <Link to={`/products/${product._id}`} className="btn-quick-view">
+            Quick Details →
+          </Link>
+        </div>
       </div>
 
-      <div className="product-info">
-        <h3 className="product-title" title={product.name}>
-          {product.name}
+      {/* Card Content & Details */}
+      <div className="card-body-content">
+        <div className="card-meta-category">{product.category}</div>
+
+        <h3 className="card-product-title">
+          <Link to={`/products/${product._id}`} title={product.name}>
+            {product.name}
+          </Link>
         </h3>
 
-        <div className="product-price">
-          ₹{Number(product.price).toLocaleString('en-IN')}
+        {/* Price & Stock info */}
+        <div className="card-pricing-row">
+          <span className="price-amount">₹{Number(product.price).toLocaleString('en-IN')}</span>
+          <span className="stock-hint">
+            {isOutOfStock ? (
+              <span className="text-out">Sold Out</span>
+            ) : product.stock <= 5 ? (
+              <span className="text-low">Only {product.stock} left</span>
+            ) : (
+              <span className="text-in">In Stock</span>
+            )}
+          </span>
         </div>
 
-        <div className="product-stock">
-          {isOutOfStock ? (
-            <span className="stock-out">Out of Stock</span>
-          ) : (
-            <span className="stock-in">{product.stock} units left</span>
-          )}
-        </div>
-
-        {message && (
+        {/* Feedback Alert Toast */}
+        {feedbackMsg && (
           <div
-            className={`wishlist-card-feedback ${
-              message.includes('Unable') || message.includes('failed')
-                ? 'feedback-error'
-                : 'feedback-success'
+            className={`card-feedback-pill ${
+              feedbackMsg.includes('Unable') || feedbackMsg.includes('failed')
+                ? 'feedback-pill-err'
+                : 'feedback-pill-ok'
             }`}
           >
-            {message}
+            {feedbackMsg}
           </div>
         )}
 
-        <div className="product-card-actions">
+        {/* Primary Action Button */}
+        <div className="card-actions-wrapper">
           <button
             type="button"
             onClick={handleAddToCart}
             disabled={isOutOfStock || isCartLoading}
-            className={`btn-card-add-cart ${inCart ? 'in-cart' : ''}`}
+            className={`btn-storefront-add ${inCart ? 'btn-in-bag' : ''}`}
           >
-            {isOutOfStock
-              ? 'Out of Stock'
-              : isCartLoading
-              ? '⏳ Adding...'
-              : inCart
-              ? '🛒 Add Another'
-              : '🛒 Add to Cart'}
+            {isOutOfStock ? (
+              'Unavailable'
+            ) : isCartLoading ? (
+              '⏳ Adding...'
+            ) : inCart ? (
+              '🛒 Add Another'
+            ) : (
+              '🛒 Add to Bag'
+            )}
           </button>
-
-          <div className="product-card-subactions">
-            <Link to={`/products/${product._id}`} className="btn-view-details">
-              Details
-            </Link>
-            <button
-              type="button"
-              onClick={handleWishlistClick}
-              disabled={loading}
-              className={`btn-card-wishlist ${isWishlisted ? 'wishlisted' : ''}`}
-            >
-              {loading ? '⏳' : isWishlisted ? '♥ Saved' : '♡ Wishlist'}
-            </button>
-          </div>
         </div>
       </div>
     </div>

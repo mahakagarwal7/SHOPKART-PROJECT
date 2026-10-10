@@ -49,7 +49,7 @@ export default function Wishlist() {
 
   if (loading) {
     return (
-      <div className="wishlist-container">
+      <div className="storefront-container wishlist-container" style={{ padding: '4rem 1.5rem' }}>
         <div className="state-container loading-state">
           <div className="spinner"></div>
           <p>Loading your wishlist...</p>
@@ -60,7 +60,7 @@ export default function Wishlist() {
 
   if (error) {
     return (
-      <div className="wishlist-container">
+      <div className="storefront-container wishlist-container" style={{ padding: '4rem 1.5rem' }}>
         <div className="state-container error-state">
           <div className="state-icon">⚠️</div>
           <h2>Something went wrong.</h2>
@@ -75,7 +75,7 @@ export default function Wishlist() {
 
   if (wishlist.length === 0) {
     return (
-      <div className="wishlist-container">
+      <div className="storefront-container wishlist-container" style={{ padding: '4rem 1.5rem' }}>
         <div className="state-container empty-wishlist-state">
           <div className="empty-heart-icon">❤️</div>
           <h2>Your wishlist is empty</h2>
@@ -89,7 +89,13 @@ export default function Wishlist() {
   }
 
   return (
-    <div className="wishlist-container">
+    <div className="storefront-container wishlist-container" style={{ padding: '2.5rem 1.5rem 5rem' }}>
+      <div className="catalog-breadcrumbs">
+        <Link to="/home">Home</Link>
+        <span>/</span>
+        <span className="current-crumb">Wishlist</span>
+      </div>
+
       <div className="wishlist-header">
         <div>
           <h1>My Wishlist</h1>
@@ -97,7 +103,7 @@ export default function Wishlist() {
             {wishlist.length} {wishlist.length === 1 ? 'product' : 'products'} saved
           </p>
         </div>
-        <Link to="/products" className="btn-continue-shopping">
+        <Link to="/products" className="btn-continue-shopping-pill">
           ← Continue Shopping
         </Link>
       </div>

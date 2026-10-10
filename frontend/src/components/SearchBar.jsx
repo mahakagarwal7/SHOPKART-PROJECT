@@ -10,20 +10,21 @@ export default function SearchBar({
   categories = ['Electronics', 'Fashion', 'Books', 'Home']
 }) {
   return (
-    <div className="search-filter-bar">
-      <div className="search-input-wrapper">
-        <span className="search-icon">🔍</span>
+    <div className="storefront-toolbar">
+      {/* Search Input Box */}
+      <div className="toolbar-search-box">
+        <span className="search-icon-symbol">🔍</span>
         <input
           type="text"
-          placeholder="Search products..."
+          placeholder="Search by product name, category..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="search-input"
+          className="toolbar-search-input"
         />
         {search && (
           <button
             type="button"
-            className="clear-search-btn"
+            className="btn-clear-search"
             onClick={() => onSearchChange('')}
             title="Clear search"
           >
@@ -32,29 +33,38 @@ export default function SearchBar({
         )}
       </div>
 
-      <div className="filter-dropdowns">
-        <select
-          value={category}
-          onChange={(e) => onCategoryChange(e.target.value)}
-          className="filter-select"
+      {/* Category Pills Strip */}
+      <div className="toolbar-category-pills">
+        <button
+          type="button"
+          onClick={() => onCategoryChange('')}
+          className={`category-filter-pill ${category === '' ? 'pill-active' : ''}`}
         >
-          <option value="">All Categories</option>
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
+          All Items
+        </button>
+        {categories.map((cat) => (
+          <button
+            key={cat}
+            type="button"
+            onClick={() => onCategoryChange(cat)}
+            className={`category-filter-pill ${category === cat ? 'pill-active' : ''}`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
 
+      {/* Sorting Dropdown */}
+      <div className="toolbar-sort-box">
         <select
           value={sort}
           onChange={(e) => onSortChange(e.target.value)}
-          className="filter-select"
-          title="Sort Products"
+          className="toolbar-sort-select"
+          title="Sort catalog"
         >
-          <option value="">Sort by: Default</option>
-          <option value="price_asc">Price: Low to High</option>
-          <option value="price_desc">Price: High to Low</option>
+          <option value="">Featured / Default</option>
+          <option value="price_asc">Price: Low to High (₹ ↑)</option>
+          <option value="price_desc">Price: High to Low (₹ ↓)</option>
         </select>
       </div>
     </div>
