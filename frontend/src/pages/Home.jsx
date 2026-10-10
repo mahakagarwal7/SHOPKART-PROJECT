@@ -88,6 +88,11 @@ export default function Home() {
       <section className="welcome-banner">
         <h1>Welcome, {user.fullName}! 👋</h1>
         <p>You are securely logged into your ShopKart customer account.</p>
+        <div style={{ marginTop: '1.25rem' }}>
+          <a href="/products" className="btn-browse-banner">
+            🛒 Browse Product Catalog
+          </a>
+        </div>
       </section>
 
       <div className="dashboard-grid">

@@ -40,6 +40,12 @@ export default function Navbar() {
           >
             Home
           </NavLink>
+          <NavLink
+            to="/products"
+            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
+          >
+            Products
+          </NavLink>
           <button type="button" onClick={handleLogout} className="btn-logout">
             Logout
           </button>
