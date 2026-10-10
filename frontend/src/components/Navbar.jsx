@@ -81,6 +81,12 @@ export default function Navbar() {
           >
             Cart {totalItems > 0 ? `(${totalItems})` : ''}
           </NavLink>
+          <NavLink
+            to="/orders"
+            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
+          >
+            Orders
+          </NavLink>
           <button type="button" onClick={handleLogout} className="btn-logout">
             Logout
           </button>
