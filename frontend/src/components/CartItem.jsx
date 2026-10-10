@@ -26,84 +26,81 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
   };
 
   return (
-    <div className={`cart-item-card ${isUpdating ? 'item-updating' : ''}`}>
-      <div className="cart-item-image-wrapper">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="cart-item-image"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = 'https://placehold.co/150x150?text=Product';
-          }}
-        />
+    <div className={`storefront-cart-row ${isUpdating ? 'row-updating' : ''}`}>
+      {/* Product Thumbnail */}
+      <div className="cart-row-image-box">
+        <Link to={`/products/${product._id}`}>
+          <img
+            src={product.image}
+            alt={product.name}
+            className="cart-row-thumb"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=200&auto=format&fit=crop';
+            }}
+          />
+        </Link>
       </div>
 
-      <div className="cart-item-details">
-        <div className="cart-item-header">
-          <Link to={`/products/${product._id}`} className="cart-item-title">
-            {product.name}
-          </Link>
-          <span className="cart-item-category">{product.category}</span>
+      {/* Product Details & Category */}
+      <div className="cart-row-details">
+        <span className="cart-row-category">{product.category}</span>
+        <h4 className="cart-row-title">
+          <Link to={`/products/${product._id}`}>{product.name}</Link>
+        </h4>
+        <div className="cart-row-unit-price">
+          ₹{Number(product.price).toLocaleString('en-IN')} <span className="unit-label">each</span>
         </div>
-
-        <div className="cart-item-price-unit">
-          ₹{Number(product.price).toLocaleString('en-IN')} <span className="text-unit">/ unit</span>
-        </div>
-
-        <div className="cart-item-stock-info">
+        <div className="cart-row-stock-state">
           {product.stock <= 5 ? (
-            <span className="stock-warning">Only {product.stock} units left in stock</span>
+            <span className="stock-alert-low">⚡ Only {product.stock} units remaining</span>
           ) : (
-            <span className="stock-available">In stock ({product.stock} available)</span>
+            <span className="stock-alert-ok">✓ In Stock</span>
           )}
         </div>
-
-        <div className="cart-item-footer">
-          <div className="cart-quantity-controls">
-            <span className="quantity-label">Quantity:</span>
-            <div className="stepper-group">
-              <button
-                type="button"
-                onClick={handleDecrease}
-                disabled={isMinQuantity || isUpdating}
-                className="btn-stepper btn-decrement"
-                title={isMinQuantity ? 'Minimum quantity is 1' : 'Decrease quantity'}
-                aria-label="Decrease quantity"
-              >
-                −
-              </button>
-              <span className="stepper-value">{quantity}</span>
-              <button
-                type="button"
-                onClick={handleIncrease}
-                disabled={isMaxQuantity || isUpdating}
-                className="btn-stepper btn-increment"
-                title={isMaxQuantity ? `Max available stock is ${product.stock}` : 'Increase quantity'}
-                aria-label="Increase quantity"
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          <div className="cart-item-actions">
-            <button
-              type="button"
-              onClick={handleRemove}
-              disabled={isUpdating}
-              className="btn-remove-cart"
-              title="Remove item from cart"
-            >
-              {isUpdating ? '⏳' : '🗑️'} Remove
-            </button>
-          </div>
-        </div>
       </div>
 
-      <div className="cart-item-total-col">
-        <span className="item-total-label">Subtotal</span>
-        <span className="item-total-amount">
+      {/* Stepper Controls */}
+      <div className="cart-row-controls">
+        <div className="storefront-stepper-box">
+          <button
+            type="button"
+            onClick={handleDecrease}
+            disabled={isMinQuantity || isUpdating}
+            className="stepper-action-btn"
+            title={isMinQuantity ? 'Min quantity is 1' : 'Decrease'}
+            aria-label="Decrease quantity"
+          >
+            −
+          </button>
+          <span className="stepper-count-display">{quantity}</span>
+          <button
+            type="button"
+            onClick={handleIncrease}
+            disabled={isMaxQuantity || isUpdating}
+            className="stepper-action-btn"
+            title={isMaxQuantity ? `Max stock is ${product.stock}` : 'Increase'}
+            aria-label="Increase quantity"
+          >
+            +
+          </button>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleRemove}
+          disabled={isUpdating}
+          className="btn-row-remove"
+          title="Remove product"
+        >
+          {isUpdating ? '⏳' : '🗑️'} Remove
+        </button>
+      </div>
+
+      {/* Line Subtotal */}
+      <div className="cart-row-subtotal">
+        <span className="subtotal-label">Subtotal</span>
+        <span className="subtotal-amount">
           ₹{Number(itemTotal).toLocaleString('en-IN')}
         </span>
       </div>

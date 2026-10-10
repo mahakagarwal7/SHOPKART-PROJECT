@@ -48,7 +48,7 @@ export default function OrderDetails() {
       const res = await api.patch(`/orders/${id}/status`, { status: newStatus });
       if (res.data?.success) {
         setOrder(res.data.order);
-        setNotice(`Order status advanced to ${newStatus}!`);
+        setNotice(`Order delivery status advanced to ${newStatus}!`);
         setTimeout(() => setNotice(''), 3000);
       }
     } catch (err) {
@@ -61,7 +61,7 @@ export default function OrderDetails() {
 
   if (loading) {
     return (
-      <div className="order-details-wrapper">
+      <div className="storefront-container" style={{ padding: '4rem 1.5rem' }}>
         <div className="state-container loading-state">
           <div className="spinner"></div>
           <p>Loading order details...</p>
@@ -72,7 +72,7 @@ export default function OrderDetails() {
 
   if (error || !order) {
     return (
-      <div className="order-details-wrapper">
+      <div className="storefront-container" style={{ padding: '4rem 1.5rem' }}>
         <div className="state-container error-state">
           <div className="state-icon">⚠️</div>
           <h2>Unable to Load Order</h2>
@@ -95,169 +95,174 @@ export default function OrderDetails() {
   });
 
   return (
-    <div className="order-details-wrapper">
-      <div className="order-details-navigation">
-        <Link to="/orders" className="btn-back-link">
-          ← Back to All Orders
-        </Link>
-      </div>
-
-      <div className="order-details-main-card">
-        {/* Header */}
-        <div className="order-details-header">
-          <div>
-            <h1 className="details-order-id">Order #{order._id}</h1>
-            <p className="details-placed-date">Placed on {dateFormatted}</p>
-          </div>
-          <div className="order-status-group">
-            <span className={`status-badge status-${order.status.toLowerCase()}`}>
-              {order.status}
-            </span>
-            <span className={`status-badge status-${order.paymentStatus.toLowerCase()}`}>
-              {order.paymentStatus}
-            </span>
-          </div>
+    <div className="storefront-order-details-page">
+      <div className="storefront-container">
+        {/* Navigation Breadcrumbs */}
+        <div className="catalog-breadcrumbs">
+          <Link to="/home">Home</Link>
+          <span>/</span>
+          <Link to="/orders">My Orders</Link>
+          <span>/</span>
+          <span className="current-crumb">Order #{order._id}</span>
         </div>
 
-        {notice && (
-          <div className="alert alert-info" style={{ marginTop: '1rem' }}>
-            <span>ℹ️</span>
-            <span>{notice}</span>
-          </div>
-        )}
-
-        {/* Visual Status Progress Tracker */}
-        <div className="order-progress-tracker">
-          <h3 className="tracker-heading">Delivery Status Progress</h3>
-          <div className="tracker-steps">
-            {ORDER_STEPS.map((step, idx) => {
-              const isCompleted = currentStepIndex >= idx;
-              const isCurrent = currentStepIndex === idx;
-
-              return (
-                <div
-                  key={step}
-                  className={`tracker-step ${isCompleted ? 'completed' : ''} ${
-                    isCurrent ? 'current' : ''
-                  }`}
-                >
-                  <div className="step-marker">{isCompleted ? '✓' : idx + 1}</div>
-                  <span className="step-label">{step}</span>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Bonus Challenge: Admin/Dev status advancement dropdown */}
-          <div className="status-progression-control">
-            <span className="control-label">Demo Status Progression (+10 Marks):</span>
-            <div className="control-buttons">
-              {ORDER_STEPS.map((step) => (
-                <button
-                  key={step}
-                  type="button"
-                  onClick={() => handleUpdateStatus(step)}
-                  disabled={statusUpdating || order.status === step}
-                  className={`btn-status-step ${order.status === step ? 'active-step' : ''}`}
-                >
-                  Set {step}
-                </button>
-              ))}
+        <div className="storefront-details-main-box">
+          {/* Header Bar */}
+          <div className="order-details-top-bar">
+            <div>
+              <h1 className="order-heading-code">Order #{order._id}</h1>
+              <p className="order-placed-timestamp">Placed on {dateFormatted}</p>
+            </div>
+            <div className="order-status-pills-row">
+              <span className={`status-pill-small pill-${order.status.toLowerCase()}`}>
+                {order.status}
+              </span>
+              <span className={`status-pill-small pill-${order.paymentStatus.toLowerCase()}`}>
+                {order.paymentStatus}
+              </span>
             </div>
           </div>
-        </div>
 
-        {/* Two-Column Grid: Items & Shipping/Payment */}
-        <div className="order-details-grid">
-          {/* Items Section */}
-          <div className="order-details-items-section">
-            <h3 className="section-heading">Ordered Items</h3>
-            <div className="order-items-list-detailed">
-              {order.items.map((item, idx) => (
-                <div key={idx} className="detailed-item-row">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="detailed-item-image"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'https://placehold.co/80x80?text=Product';
-                    }}
-                  />
-                  <div className="detailed-item-info">
-                    <h4 className="detailed-item-name">{item.name}</h4>
-                    <span className="detailed-item-meta">
-                      Qty: {item.quantity} × ₹{Number(item.price).toLocaleString('en-IN')}
+          {notice && (
+            <div className="alert alert-info" style={{ marginTop: '1rem' }}>
+              <span>ℹ️</span>
+              <span>{notice}</span>
+            </div>
+          )}
+
+          {/* Delivery Progress Timeline */}
+          <div className="delivery-timeline-card">
+            <h3 className="timeline-title">Delivery Status Timeline</h3>
+            <div className="timeline-steps-track">
+              {ORDER_STEPS.map((step, idx) => {
+                const isCompleted = currentStepIndex >= idx;
+                const isCurrent = currentStepIndex === idx;
+
+                return (
+                  <div
+                    key={step}
+                    className={`timeline-step-node ${isCompleted ? 'node-completed' : ''} ${
+                      isCurrent ? 'node-current' : ''
+                    }`}
+                  >
+                    <div className="step-circle">{isCompleted ? '✓' : idx + 1}</div>
+                    <span className="step-text">{step}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Bonus Challenge: Admin/Dev status advancement dropdown */}
+            <div className="timeline-admin-control">
+              <span className="admin-control-label">Demo Status Progression (+10 Marks):</span>
+              <div className="admin-buttons-row">
+                {ORDER_STEPS.map((step) => (
+                  <button
+                    key={step}
+                    type="button"
+                    onClick={() => handleUpdateStatus(step)}
+                    disabled={statusUpdating || order.status === step}
+                    className={`btn-step-advance ${order.status === step ? 'advance-active' : ''}`}
+                  >
+                    Set {step}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 2-Column Grid: Ordered Items & Shipping/Invoice */}
+          <div className="order-details-content-grid">
+            {/* Left: Ordered Items Snapshot */}
+            <div className="order-items-table-card">
+              <h3 className="card-subheading">Ordered Items Snapshot</h3>
+              <div className="items-snapshot-list">
+                {order.items.map((item, idx) => (
+                  <div key={idx} className="snapshot-item-card">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="snapshot-item-img"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=120&auto=format&fit=crop';
+                      }}
+                    />
+                    <div className="snapshot-item-details">
+                      <h4 className="snapshot-name">{item.name}</h4>
+                      <span className="snapshot-unit">
+                        Qty: {item.quantity} × ₹{Number(item.price).toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                    <div className="snapshot-total-price">
+                      ₹{Number(item.price * item.quantity).toLocaleString('en-IN')}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Shipping & Invoice Summary */}
+            <div className="order-sidebar-meta">
+              <div className="meta-box-card">
+                <h3 className="card-subheading">📍 Delivery Address</h3>
+                <div className="address-text-block">
+                  <p className="recipient-name">{order.shippingAddress.fullName}</p>
+                  <p>{order.shippingAddress.addressLine1}</p>
+                  <p>
+                    {order.shippingAddress.city}, {order.shippingAddress.state} -{' '}
+                    {order.shippingAddress.pincode}
+                  </p>
+                  <p className="recipient-phone">📞 {order.shippingAddress.phone}</p>
+                </div>
+              </div>
+
+              <div className="meta-box-card">
+                <h3 className="card-subheading">💳 Payment Reference</h3>
+                <div className="payment-meta-list">
+                  <div className="payment-meta-row">
+                    <span>Gateway:</span>
+                    <strong>Razorpay Test Mode</strong>
+                  </div>
+                  <div className="payment-meta-row">
+                    <span>Payment Status:</span>
+                    <span className={`status-pill-small pill-${order.paymentStatus.toLowerCase()}`}>
+                      {order.paymentStatus}
                     </span>
                   </div>
-                  <div className="detailed-item-total">
-                    ₹{Number(item.price * item.quantity).toLocaleString('en-IN')}
-                  </div>
+                  {order.razorpayOrderId && (
+                    <div className="payment-meta-row">
+                      <span>Razorpay Order ID:</span>
+                      <span className="code-pill">{order.razorpayOrderId}</span>
+                    </div>
+                  )}
+                  {order.razorpayPaymentId && (
+                    <div className="payment-meta-row">
+                      <span>Payment ID:</span>
+                      <span className="code-pill">{order.razorpayPaymentId}</span>
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Shipping & Payment Summary Sidebar */}
-          <div className="order-details-meta-section">
-            <div className="meta-card">
-              <h3 className="section-heading">📍 Shipping Address</h3>
-              <div className="meta-address">
-                <p className="meta-name">{order.shippingAddress.fullName}</p>
-                <p>{order.shippingAddress.addressLine1}</p>
-                <p>
-                  {order.shippingAddress.city}, {order.shippingAddress.state} -{' '}
-                  {order.shippingAddress.pincode}
-                </p>
-                <p className="meta-phone">📞 {order.shippingAddress.phone}</p>
               </div>
-            </div>
 
-            <div className="meta-card">
-              <h3 className="section-heading">💳 Payment Information</h3>
-              <div className="meta-payment-info">
-                <div className="payment-row">
-                  <span>Method:</span>
-                  <strong>Razorpay Test Checkout</strong>
-                </div>
-                <div className="payment-row">
-                  <span>Payment Status:</span>
-                  <span className={`status-badge status-${order.paymentStatus.toLowerCase()}`}>
-                    {order.paymentStatus}
-                  </span>
-                </div>
-                {order.razorpayOrderId && (
-                  <div className="payment-row">
-                    <span>Razorpay Order ID:</span>
-                    <span className="code-snippet">{order.razorpayOrderId}</span>
+              <div className="meta-box-card">
+                <h3 className="card-subheading">🧾 Invoice Summary</h3>
+                <div className="invoice-rows-list">
+                  <div className="invoice-row">
+                    <span>Subtotal</span>
+                    <span>₹{Number(order.totalAmount).toLocaleString('en-IN')}</span>
                   </div>
-                )}
-                {order.razorpayPaymentId && (
-                  <div className="payment-row">
-                    <span>Payment ID:</span>
-                    <span className="code-snippet">{order.razorpayPaymentId}</span>
+                  <div className="invoice-row">
+                    <span>Shipping</span>
+                    <span className="text-shipping-free">FREE</span>
                   </div>
-                )}
-              </div>
-            </div>
-
-            <div className="meta-card">
-              <h3 className="section-heading">🧾 Invoice Summary</h3>
-              <div className="summary-rows">
-                <div className="summary-row">
-                  <span>Subtotal</span>
-                  <span>₹{Number(order.totalAmount).toLocaleString('en-IN')}</span>
-                </div>
-                <div className="summary-row">
-                  <span>Shipping</span>
-                  <span className="text-free">FREE</span>
-                </div>
-                <div className="summary-divider"></div>
-                <div className="summary-row summary-total">
-                  <span>Order Total</span>
-                  <span className="summary-total-val">
-                    ₹{Number(order.totalAmount).toLocaleString('en-IN')}
-                  </span>
+                  <div className="summary-divider-line"></div>
+                  <div className="invoice-row total-row">
+                    <span>Total Paid</span>
+                    <span className="invoice-total-amount">
+                      ₹{Number(order.totalAmount).toLocaleString('en-IN')}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

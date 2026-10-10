@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
 
-// Step 9: Helper function to dynamically load Razorpay Checkout script
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
     if (window.Razorpay) {
@@ -46,7 +45,6 @@ export default function Checkout() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error for field on change
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
@@ -101,7 +99,7 @@ export default function Checkout() {
     setIsSubmitting(true);
 
     try {
-      // 1. Create Pending ShopKart Order & Razorpay Order on the backend
+      // 1. Create Pending ShopKart Order & Razorpay Order on backend
       const res = await api.post('/orders/create-payment-order', {
         shippingAddress: {
           fullName: formData.fullName.trim(),
@@ -154,7 +152,6 @@ export default function Checkout() {
             });
 
             if (verifyRes.data?.success) {
-              // 5. Clear global cart state and navigate to Order Confirmation
               await clearCart();
               navigate(`/order-success/${shopKartOrderId}`);
             } else {
@@ -189,7 +186,7 @@ export default function Checkout() {
         console.error('Payment failed:', failResponse.error);
         setBackendError(
           failResponse.error?.description ||
-            'Payment failed. Your cart has been preserved. Please try again.'
+            'Payment failed. Your shopping bag has been preserved. Please try again.'
         );
         setIsSubmitting(false);
       });
@@ -204,13 +201,12 @@ export default function Checkout() {
     }
   };
 
-  // Helper for offline / lab mock verification
   const handleOfflineCompletePayment = async (success) => {
     if (!offlineModalData) return;
     setIsSubmitting(true);
 
     if (!success) {
-      setBackendError('Test payment was cancelled or failed. Your cart has been preserved.');
+      setBackendError('Test payment was cancelled. Your bag has been preserved.');
       setOfflineModalData(null);
       setIsSubmitting(false);
       return;
@@ -240,253 +236,265 @@ export default function Checkout() {
 
   if (cartLoading) {
     return (
-      <div className="checkout-page-wrapper">
-        <div className="state-container loading-state">
-          <div className="spinner"></div>
-          <p>Loading checkout details...</p>
+      <div className="storefront-checkout-page">
+        <div className="storefront-container" style={{ padding: '4rem 1.5rem' }}>
+          <div className="state-container loading-state">
+            <div className="spinner"></div>
+            <p>Preparing checkout...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="checkout-page-wrapper">
-      <div className="checkout-header">
-        <Link to="/cart" className="btn-back-link">
-          ← Back to Cart
-        </Link>
-        <h1 className="checkout-title">Checkout & Payment</h1>
-        <p className="checkout-subtitle">Complete your shipping details to place your order</p>
-      </div>
-
-      {backendError && (
-        <div className="alert alert-error" style={{ marginBottom: '1.5rem' }}>
-          <span>⚠️</span>
-          <span>{backendError}</span>
-        </div>
-      )}
-
-      <div className="checkout-layout">
-        {/* Left Column: Shipping Address Form */}
-        <div className="checkout-form-section">
-          <div className="checkout-card">
-            <h2 className="section-title">📍 Shipping Details</h2>
-
-            <form onSubmit={handlePlaceOrder} noValidate className="shipping-form">
-              <div className="form-group">
-                <label className="form-label" htmlFor="fullName">
-                  Full Name *
-                </label>
-                <input
-                  id="fullName"
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  placeholder="e.g. Aarav Sharma"
-                  className={`form-input ${errors.fullName ? 'input-error' : ''}`}
-                />
-                {errors.fullName && <span className="field-error">{errors.fullName}</span>}
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" htmlFor="phone">
-                  Phone Number *
-                </label>
-                <input
-                  id="phone"
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="e.g. 9876543210"
-                  className={`form-input ${errors.phone ? 'input-error' : ''}`}
-                />
-                {errors.phone && <span className="field-error">{errors.phone}</span>}
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" htmlFor="addressLine1">
-                  Street Address / Apartment *
-                </label>
-                <input
-                  id="addressLine1"
-                  type="text"
-                  name="addressLine1"
-                  value={formData.addressLine1}
-                  onChange={handleChange}
-                  placeholder="e.g. Flat 402, Sunshine Heights, MG Road"
-                  className={`form-input ${errors.addressLine1 ? 'input-error' : ''}`}
-                />
-                {errors.addressLine1 && (
-                  <span className="field-error">{errors.addressLine1}</span>
-                )}
-              </div>
-
-              <div className="form-row-three">
-                <div className="form-group">
-                  <label className="form-label" htmlFor="city">
-                    City *
-                  </label>
-                  <input
-                    id="city"
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleChange}
-                    placeholder="e.g. Bengaluru"
-                    className={`form-input ${errors.city ? 'input-error' : ''}`}
-                  />
-                  {errors.city && <span className="field-error">{errors.city}</span>}
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label" htmlFor="state">
-                    State *
-                  </label>
-                  <input
-                    id="state"
-                    type="text"
-                    name="state"
-                    value={formData.state}
-                    onChange={handleChange}
-                    placeholder="e.g. Karnataka"
-                    className={`form-input ${errors.state ? 'input-error' : ''}`}
-                  />
-                  {errors.state && <span className="field-error">{errors.state}</span>}
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label" htmlFor="pincode">
-                    Pincode (6 digits) *
-                  </label>
-                  <input
-                    id="pincode"
-                    type="text"
-                    name="pincode"
-                    maxLength={6}
-                    value={formData.pincode}
-                    onChange={handleChange}
-                    placeholder="e.g. 560001"
-                    className={`form-input ${errors.pincode ? 'input-error' : ''}`}
-                  />
-                  {errors.pincode && <span className="field-error">{errors.pincode}</span>}
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="btn-submit-order"
-              >
-                {isSubmitting ? (
-                  <>
-                    <span className="spinner-sm"></span> Processing Order...
-                  </>
-                ) : (
-                  <>💳 Pay with Razorpay (₹{Number(subtotal).toLocaleString('en-IN')})</>
-                )}
-              </button>
-            </form>
+    <div className="storefront-checkout-page">
+      <div className="storefront-container">
+        {/* Breadcrumb & Header */}
+        <div className="checkout-header-row">
+          <div className="catalog-breadcrumbs">
+            <Link to="/home">Home</Link>
+            <span>/</span>
+            <Link to="/cart">Shopping Bag</Link>
+            <span>/</span>
+            <span className="current-crumb">Checkout</span>
           </div>
+          <h1 className="checkout-main-title">Fast Checkout</h1>
+          <p className="checkout-subtitle-text">
+            Enter your delivery details to complete your order securely
+          </p>
         </div>
 
-        {/* Right Column: Order Summary Review */}
-        <div className="checkout-summary-section">
-          <div className="checkout-summary-card">
-            <h2 className="summary-title">Review Order ({totalItems} items)</h2>
+        {backendError && (
+          <div className="alert alert-error" style={{ marginBottom: '1.5rem' }}>
+            <span>⚠️</span>
+            <span>{backendError}</span>
+          </div>
+        )}
 
-            <div className="checkout-items-list">
-              {cartItems.map((item) => (
-                <div key={item.product?._id || item._id} className="checkout-item-row">
-                  <img
-                    src={item.product?.image}
-                    alt={item.product?.name}
-                    className="checkout-item-thumb"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'https://placehold.co/80x80?text=Product';
-                    }}
+        {/* 2-Column Checkout Layout */}
+        <div className="storefront-checkout-layout">
+          {/* Left Column: Shipping Address Form */}
+          <div className="checkout-form-column">
+            <div className="checkout-box-card">
+              <h2 className="box-card-title">📍 Shipping Information</h2>
+
+              <form onSubmit={handlePlaceOrder} noValidate className="storefront-shipping-form">
+                <div className="form-group">
+                  <label className="form-label" htmlFor="fullName">
+                    Full Name *
+                  </label>
+                  <input
+                    id="fullName"
+                    type="text"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    placeholder="e.g. Aarav Sharma"
+                    className={`form-input ${errors.fullName ? 'input-error' : ''}`}
                   />
-                  <div className="checkout-item-info">
-                    <span className="checkout-item-name">{item.product?.name}</span>
-                    <span className="checkout-item-meta">
-                      Qty: {item.quantity} × ₹{Number(item.product?.price || 0).toLocaleString('en-IN')}
-                    </span>
+                  {errors.fullName && <span className="field-error">{errors.fullName}</span>}
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label" htmlFor="phone">
+                    Phone Number (10 digits) *
+                  </label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="e.g. 9876543210"
+                    className={`form-input ${errors.phone ? 'input-error' : ''}`}
+                  />
+                  {errors.phone && <span className="field-error">{errors.phone}</span>}
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label" htmlFor="addressLine1">
+                    Street Address / Apartment *
+                  </label>
+                  <input
+                    id="addressLine1"
+                    type="text"
+                    name="addressLine1"
+                    value={formData.addressLine1}
+                    onChange={handleChange}
+                    placeholder="e.g. Flat 302, Green Valley Apartments, MG Road"
+                    className={`form-input ${errors.addressLine1 ? 'input-error' : ''}`}
+                  />
+                  {errors.addressLine1 && (
+                    <span className="field-error">{errors.addressLine1}</span>
+                  )}
+                </div>
+
+                <div className="form-row-three-grid">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="city">
+                      City *
+                    </label>
+                    <input
+                      id="city"
+                      type="text"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleChange}
+                      placeholder="e.g. Bengaluru"
+                      className={`form-input ${errors.city ? 'input-error' : ''}`}
+                    />
+                    {errors.city && <span className="field-error">{errors.city}</span>}
                   </div>
-                  <div className="checkout-item-total">
-                    ₹{Number((item.product?.price || 0) * item.quantity).toLocaleString('en-IN')}
+
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="state">
+                      State *
+                    </label>
+                    <input
+                      id="state"
+                      type="text"
+                      name="state"
+                      value={formData.state}
+                      onChange={handleChange}
+                      placeholder="e.g. Karnataka"
+                      className={`form-input ${errors.state ? 'input-error' : ''}`}
+                    />
+                    {errors.state && <span className="field-error">{errors.state}</span>}
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="pincode">
+                      Pincode (6 digits) *
+                    </label>
+                    <input
+                      id="pincode"
+                      type="text"
+                      name="pincode"
+                      maxLength={6}
+                      value={formData.pincode}
+                      onChange={handleChange}
+                      placeholder="e.g. 560001"
+                      className={`form-input ${errors.pincode ? 'input-error' : ''}`}
+                    />
+                    {errors.pincode && <span className="field-error">{errors.pincode}</span>}
                   </div>
                 </div>
-              ))}
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="btn-pay-razorpay-primary"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="spinner-sm"></span> Processing Razorpay Order...
+                    </>
+                  ) : (
+                    <>💳 Pay with Razorpay • ₹{Number(subtotal).toLocaleString('en-IN')}</>
+                  )}
+                </button>
+              </form>
             </div>
+          </div>
 
-            <div className="summary-divider"></div>
+          {/* Right Column: Order Review Sidebar */}
+          <div className="checkout-summary-column">
+            <div className="storefront-review-card">
+              <h2 className="review-card-title">Order Review ({totalItems} items)</h2>
 
-            <div className="summary-rows">
-              <div className="summary-row">
-                <span>Subtotal</span>
-                <span>₹{Number(subtotal).toLocaleString('en-IN')}</span>
+              <div className="review-items-list-box">
+                {cartItems.map((item) => (
+                  <div key={item.product?._id || item._id} className="review-item-row">
+                    <img
+                      src={item.product?.image}
+                      alt={item.product?.name}
+                      className="review-item-thumb"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=100&auto=format&fit=crop';
+                      }}
+                    />
+                    <div className="review-item-meta">
+                      <span className="review-item-name">{item.product?.name}</span>
+                      <span className="review-item-qty">
+                        Qty: {item.quantity} × ₹{Number(item.product?.price || 0).toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                    <div className="review-item-total">
+                      ₹{Number((item.product?.price || 0) * item.quantity).toLocaleString('en-IN')}
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="summary-row">
-                <span>Shipping</span>
-                <span className="text-free">FREE</span>
-              </div>
-              <div className="summary-divider"></div>
-              <div className="summary-row summary-total">
-                <span>Total Amount</span>
-                <span className="summary-total-val">
-                  ₹{Number(subtotal).toLocaleString('en-IN')}
-                </span>
-              </div>
-            </div>
 
-            <div className="checkout-security-badge">
-              <span>🔒</span>
-              <span>100% Secure Checkout powered by Razorpay Test Mode</span>
+              <div className="review-divider-line"></div>
+
+              <div className="review-breakdown-rows">
+                <div className="review-row">
+                  <span>Subtotal</span>
+                  <span>₹{Number(subtotal).toLocaleString('en-IN')}</span>
+                </div>
+                <div className="review-row">
+                  <span>Standard Shipping</span>
+                  <span className="text-shipping-free">FREE</span>
+                </div>
+                <div className="review-divider-line"></div>
+                <div className="review-row review-total-row">
+                  <span>Total Amount</span>
+                  <span className="review-total-val">
+                    ₹{Number(subtotal).toLocaleString('en-IN')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="review-security-banner">
+                <span>🔒</span>
+                <span>256-Bit SSL Encrypted Razorpay Test Checkout</span>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Offline / Test Mode Modal Simulation */}
+        {offlineModalData && (
+          <div className="modal-backdrop">
+            <div className="modal-card">
+              <div className="modal-header">
+                <h3>💳 Razorpay Test Mode Checkout</h3>
+              </div>
+              <div className="modal-body">
+                <p>
+                  <strong>ShopKart Order ID:</strong> {offlineModalData.shopKartOrderId}
+                </p>
+                <p>
+                  <strong>Total Amount:</strong> ₹
+                  {Number(offlineModalData.amount / 100).toLocaleString('en-IN')}
+                </p>
+                <p className="modal-hint">
+                  Simulating Razorpay Test Mode payment response for automated lab testing.
+                </p>
+              </div>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="btn-modal-success"
+                  onClick={() => handleOfflineCompletePayment(true)}
+                >
+                  ✅ Simulate Successful Payment
+                </button>
+                <button
+                  type="button"
+                  className="btn-modal-cancel"
+                  onClick={() => handleOfflineCompletePayment(false)}
+                >
+                  ❌ Simulate Failed Payment
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Offline / Test Mode Modal fallback if Razorpay CDN script is blocked */}
-      {offlineModalData && (
-        <div className="modal-backdrop">
-          <div className="modal-card">
-            <div className="modal-header">
-              <h3>💳 Razorpay Test Mode Checkout</h3>
-            </div>
-            <div className="modal-body">
-              <p>
-                <strong>Order ID:</strong> {offlineModalData.shopKartOrderId}
-              </p>
-              <p>
-                <strong>Total Amount:</strong> ₹
-                {Number(offlineModalData.amount / 100).toLocaleString('en-IN')}
-              </p>
-              <p className="modal-hint">
-                Simulating Razorpay Test Mode payment response for automated lab testing.
-              </p>
-            </div>
-            <div className="modal-actions">
-              <button
-                type="button"
-                className="btn-modal-success"
-                onClick={() => handleOfflineCompletePayment(true)}
-              >
-                ✅ Simulate Successful Payment
-              </button>
-              <button
-                type="button"
-                className="btn-modal-cancel"
-                onClick={() => handleOfflineCompletePayment(false)}
-              >
-                ❌ Simulate Failed Payment
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
