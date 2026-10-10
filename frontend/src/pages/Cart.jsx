@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import CartItem from '../components/CartItem';
 
 export default function Cart() {
+  const navigate = useNavigate();
   const {
     cartItems,
     loading,
@@ -53,10 +54,7 @@ export default function Cart() {
   };
 
   const handleProceedToCheckout = () => {
-    setCheckoutNotice(true);
-    setTimeout(() => {
-      setCheckoutNotice(false);
-    }, 4000);
+    navigate('/checkout');
   };
 
   if (loading) {
