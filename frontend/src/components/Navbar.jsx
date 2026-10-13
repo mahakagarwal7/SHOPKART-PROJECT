@@ -85,6 +85,7 @@ export default function Navbar() {
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
+      localStorage.removeItem('shopkart_token');
       setCurrentUser(null);
       setAccountMenuOpen(false);
       navigate('/login');

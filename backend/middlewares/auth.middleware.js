@@ -3,7 +3,9 @@ import Customer from "../models/customer.model.js";
 
 const isAuthenticated = async (req, res, next) => {
     try {
-        const token = req.cookies?.token;
+        const authHeader = req.headers.authorization;
+        const bearerToken = authHeader && authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
+        const token = req.cookies?.token || bearerToken;
 
         if (!token) {
             return res.status(401).json({ message: "Unauthorized: No token provided" });

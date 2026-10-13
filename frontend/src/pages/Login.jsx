@@ -55,7 +55,10 @@ export default function Login() {
 
     setLoading(true);
     try {
-      await api.post('/customers/login', form);
+      const res = await api.post('/customers/login', form);
+      if (res.data?.token) {
+        localStorage.setItem('shopkart_token', res.data.token);
+      }
       setSuccessMessage('Login successful! Redirecting to storefront...');
       setTimeout(() => {
         navigate('/home', { replace: true });
