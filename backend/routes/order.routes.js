@@ -6,7 +6,7 @@ import {
   getOrderById,
   updateOrderStatus
 } from "../controllers/order.controller.js";
-import { isAuthenticated } from "../middlewares/auth.middleware.js";
+import isAuthenticated  from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
