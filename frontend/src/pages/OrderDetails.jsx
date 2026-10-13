@@ -8,6 +8,7 @@ import {
   CreditCardIcon,
   ArrowLeftIcon,
   ShieldIcon,
+  ChevronDownIcon,
 } from '../components/Icons';
 
 const ORDER_STEPS = ['PLACED', 'CONFIRMED', 'SHIPPED', 'DELIVERED'];
@@ -19,6 +20,14 @@ export default function OrderDetails() {
   const [error, setError] = useState('');
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [notice, setNotice] = useState('');
+  const [copiedRef, setCopiedRef] = useState(false);
+
+  const handleCopyRef = (text) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedRef(true);
+    setTimeout(() => setCopiedRef(false), 2000);
+  };
 
   const fetchOrder = async () => {
     setLoading(true);
@@ -233,32 +242,79 @@ export default function OrderDetails() {
                 </div>
               </div>
 
-              <div className="meta-box-card">
-                <h3 className="card-subheading">💳 Payment Reference</h3>
+              <div className="meta-box-card payment-summary-card">
+                <div className="card-subheading-row">
+                  <div className="subheading-left">
+                    <CreditCardIcon size={18} />
+                    <h3 className="card-subheading">Payment & Transaction</h3>
+                  </div>
+                  <span className={`status-pill-small pill-${order.paymentStatus.toLowerCase()}`}>
+                    <CheckIcon size={12} /> {order.paymentStatus}
+                  </span>
+                </div>
+
                 <div className="payment-meta-list">
                   <div className="payment-meta-row">
-                    <span>Gateway:</span>
-                    <strong>Razorpay Test Mode</strong>
-                  </div>
-                  <div className="payment-meta-row">
-                    <span>Payment Status:</span>
-                    <span className={`status-pill-small pill-${order.paymentStatus.toLowerCase()}`}>
-                      {order.paymentStatus}
-                    </span>
-                  </div>
-                  {order.razorpayOrderId && (
-                    <div className="payment-meta-row">
-                      <span>Razorpay Order:</span>
-                      <span className="code-pill">{order.razorpayOrderId}</span>
+                    <span className="meta-row-label">Payment Method</span>
+                    <div className="meta-row-val-highlight">
+                      <ShieldIcon size={14} className="text-primary" />
+                      <span>Razorpay Online Payment</span>
                     </div>
-                  )}
+                  </div>
+
+                  <div className="payment-meta-row">
+                    <span className="meta-row-label">Security</span>
+                    <span className="verified-ssl-text">256-Bit SSL Encrypted</span>
+                  </div>
+
                   {order.razorpayPaymentId && (
-                    <div className="payment-meta-row">
-                      <span>Payment ID:</span>
-                      <span className="code-pill">{order.razorpayPaymentId}</span>
+                    <div className="payment-meta-row receipt-row">
+                      <span className="meta-row-label">Receipt Reference</span>
+                      <div className="receipt-pill-group">
+                        <span className="receipt-masked-code" title={order.razorpayPaymentId}>
+                          {order.razorpayPaymentId.length > 14
+                            ? `${order.razorpayPaymentId.slice(0, 8)}•••${order.razorpayPaymentId.slice(-4)}`
+                            : order.razorpayPaymentId}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyRef(order.razorpayPaymentId)}
+                          className="btn-copy-receipt"
+                          title="Copy Payment Reference ID"
+                        >
+                          {copiedRef ? '✓ Copied' : 'Copy'}
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
+
+                {/* Collapsible Technical Reference Drawer */}
+                {(order.razorpayOrderId || order.razorpayPaymentId) && (
+                  <details className="tech-details-disclosure">
+                    <summary className="tech-details-summary">
+                      <span>Gateway Reference Details</span>
+                      <ChevronDownIcon size={14} className="disclosure-chevron" />
+                    </summary>
+                    <div className="tech-details-drawer">
+                      {order.razorpayOrderId && (
+                        <div className="tech-detail-item">
+                          <span className="tech-detail-key">Order Ref:</span>
+                          <code className="tech-detail-code">{order.razorpayOrderId}</code>
+                        </div>
+                      )}
+                      {order.razorpayPaymentId && (
+                        <div className="tech-detail-item">
+                          <span className="tech-detail-key">Payment Ref:</span>
+                          <code className="tech-detail-code">{order.razorpayPaymentId}</code>
+                        </div>
+                      )}
+                      <p className="tech-detail-hint">
+                        Reference tokens used for automated backend reconciliation and gateway verification.
+                      </p>
+                    </div>
+                  </details>
+                )}
               </div>
 
               <div className="meta-box-card">
