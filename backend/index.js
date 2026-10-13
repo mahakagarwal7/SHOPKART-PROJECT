@@ -14,6 +14,7 @@ const port = process.env.PORT || 8081;
 const dbUrl = process.env.MONGO_URI || process.env.dbUrl || process.env.DB_URL || "mongodb://127.0.0.1:27017/shopkart";
 
 const app = express();
+app.set("trust proxy", 1);
 
 
 app.use((req, res, next) => {
