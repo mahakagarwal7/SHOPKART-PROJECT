@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import WishlistCard from '../components/WishlistCard';
+import {
+  HeartIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  CheckIcon,
+} from '../components/Icons';
 
 export default function Wishlist() {
   const [wishlist, setWishlist] = useState([]);
@@ -38,7 +44,7 @@ export default function Wishlist() {
       await api.delete(`/wishlist/${productId}`);
       // Remove product from state without page reload
       setWishlist((prev) => prev.filter((item) => item._id !== productId));
-      setNotice('Product removed from your wishlist.');
+      setNotice('Product removed from your saved items.');
       setTimeout(() => setNotice(''), 3000);
     } catch (err) {
       console.error('Remove error:', err);
@@ -52,7 +58,7 @@ export default function Wishlist() {
       <div className="storefront-container wishlist-container" style={{ padding: '4rem 1.5rem' }}>
         <div className="state-container loading-state">
           <div className="spinner"></div>
-          <p>Loading your wishlist...</p>
+          <p>Loading your saved items...</p>
         </div>
       </div>
     );
@@ -63,7 +69,7 @@ export default function Wishlist() {
       <div className="storefront-container wishlist-container" style={{ padding: '4rem 1.5rem' }}>
         <div className="state-container error-state">
           <div className="state-icon">⚠️</div>
-          <h2>Something went wrong.</h2>
+          <h2>Something went wrong</h2>
           <p>{error}</p>
           <button type="button" onClick={fetchWishlist} className="btn-retry">
             Try Again
@@ -77,11 +83,14 @@ export default function Wishlist() {
     return (
       <div className="storefront-container wishlist-container" style={{ padding: '4rem 1.5rem' }}>
         <div className="state-container empty-wishlist-state">
-          <div className="empty-heart-icon">❤️</div>
-          <h2>Your wishlist is empty</h2>
-          <p>Save products you love and find them here later.</p>
+          <div className="empty-heart-icon">
+            <HeartIcon size={48} filled={false} />
+          </div>
+          <h2>Your saved wishlist is empty</h2>
+          <p>Explore our catalog, save items you love, and they will be waiting here for you.</p>
           <Link to="/products" className="btn-browse-empty">
-            Browse Products
+            <span>Explore Catalog</span>
+            <ArrowRightIcon size={16} />
           </Link>
         </div>
       </div>
@@ -93,29 +102,30 @@ export default function Wishlist() {
       <div className="catalog-breadcrumbs">
         <Link to="/home">Home</Link>
         <span>/</span>
-        <span className="current-crumb">Wishlist</span>
+        <span className="current-crumb">Saved Wishlist</span>
       </div>
 
       <div className="wishlist-header">
         <div>
-          <h1>My Wishlist</h1>
+          <h1 className="wishlist-title">Saved Wishlist</h1>
           <p className="wishlist-count-text">
-            {wishlist.length} {wishlist.length === 1 ? 'product' : 'products'} saved
+            {wishlist.length} {wishlist.length === 1 ? 'product' : 'products'} saved in your list
           </p>
         </div>
         <Link to="/products" className="btn-continue-shopping-pill">
-          ← Continue Shopping
+          <ArrowLeftIcon size={16} />
+          <span>Continue Shopping</span>
         </Link>
       </div>
 
       {notice && (
-        <div className="alert alert-success" style={{ marginBottom: '1.5rem' }}>
-          <span>ℹ️</span>
+        <div className="alert alert-info" style={{ marginBottom: '1.5rem' }}>
+          <CheckIcon size={16} />
           <span>{notice}</span>
         </div>
       )}
 
-      <div className="products-grid">
+      <div className="storefront-products-grid">
         {wishlist.map((product) => (
           <WishlistCard
             key={product._id}

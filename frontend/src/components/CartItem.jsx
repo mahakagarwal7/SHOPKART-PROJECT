@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { TrashIcon, MinusIcon, PlusIcon } from './Icons';
 
 export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating }) {
   const { product, quantity } = item;
@@ -36,7 +37,8 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
             className="cart-row-thumb"
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=200&auto=format&fit=crop';
+              e.target.src =
+                'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=200&auto=format&fit=crop';
             }}
           />
         </Link>
@@ -53,7 +55,7 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
         </div>
         <div className="cart-row-stock-state">
           {product.stock <= 5 ? (
-            <span className="stock-alert-low">⚡ Only {product.stock} units remaining</span>
+            <span className="stock-alert-low">⚡ Only {product.stock} units left in stock</span>
           ) : (
             <span className="stock-alert-ok">✓ In Stock</span>
           )}
@@ -68,7 +70,7 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
             onClick={handleDecrease}
             disabled={isMinQuantity || isUpdating}
             className="stepper-action-btn"
-            title={isMinQuantity ? 'Min quantity is 1' : 'Decrease'}
+            title={isMinQuantity ? 'Minimum quantity is 1' : 'Decrease quantity'}
             aria-label="Decrease quantity"
           >
             −
@@ -79,7 +81,7 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
             onClick={handleIncrease}
             disabled={isMaxQuantity || isUpdating}
             className="stepper-action-btn"
-            title={isMaxQuantity ? `Max stock is ${product.stock}` : 'Increase'}
+            title={isMaxQuantity ? `Only ${product.stock} units available` : 'Increase quantity'}
             aria-label="Increase quantity"
           >
             +
@@ -93,7 +95,8 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
           className="btn-row-remove"
           title="Remove product"
         >
-          {isUpdating ? '⏳' : '🗑️'} Remove
+          {isUpdating ? <span className="spinner-sm"></span> : <TrashIcon size={15} />}
+          <span>Remove</span>
         </button>
       </div>
 

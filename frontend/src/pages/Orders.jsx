@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import {
+  PackageIcon,
+  TruckIcon,
+  CheckIcon,
+  ArrowRightIcon,
+  ArrowLeftIcon,
+} from '../components/Icons';
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
@@ -33,7 +40,7 @@ export default function Orders() {
       <div className="storefront-container" style={{ padding: '4rem 1.5rem' }}>
         <div className="state-container loading-state">
           <div className="spinner"></div>
-          <p>Loading order history...</p>
+          <p>Loading your order history...</p>
         </div>
       </div>
     );
@@ -58,11 +65,14 @@ export default function Orders() {
     return (
       <div className="storefront-container" style={{ padding: '4rem 1.5rem' }}>
         <div className="state-container empty-orders-state">
-          <div className="empty-orders-icon">📦</div>
-          <h2>You have not placed any orders yet</h2>
-          <p>Once you purchase items from our catalog, track them here.</p>
+          <div className="empty-orders-icon">
+            <PackageIcon size={48} />
+          </div>
+          <h2>No orders placed yet</h2>
+          <p>Once you make a purchase from our catalog, track its journey here.</p>
           <Link to="/products" className="btn-browse-empty">
-            Start Shopping →
+            <span>Explore Catalog</span>
+            <ArrowRightIcon size={16} />
           </Link>
         </div>
       </div>
@@ -80,13 +90,14 @@ export default function Orders() {
               <span>/</span>
               <span className="current-crumb">My Orders</span>
             </div>
-            <h1 className="orders-main-title">My Orders</h1>
+            <h1 className="orders-main-title">Order History</h1>
             <p className="orders-subtitle-text">
               {orders.length} {orders.length === 1 ? 'order' : 'orders'} placed with ShopKart
             </p>
           </div>
           <Link to="/products" className="btn-continue-shopping-pill">
-            ← Continue Shopping
+            <ArrowLeftIcon size={16} />
+            <span>Continue Shopping</span>
           </Link>
         </div>
 
@@ -105,7 +116,7 @@ export default function Orders() {
               <div key={order._id} className="storefront-order-card">
                 <div className="order-card-header-bar">
                   <div className="order-meta-info">
-                    <span className="order-code">Order #{order._id}</span>
+                    <span className="order-code">#{order._id}</span>
                     <span className="order-date-badge">• Placed on {dateStr}</span>
                   </div>
                   <div className="order-status-pills-row">
@@ -127,7 +138,8 @@ export default function Orders() {
                         className="snapshot-thumb"
                         onError={(e) => {
                           e.target.onerror = null;
-                          e.target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=100&auto=format&fit=crop';
+                          e.target.src =
+                            'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=100&auto=format&fit=crop';
                         }}
                       />
                       <div className="snapshot-info">
@@ -145,13 +157,14 @@ export default function Orders() {
 
                 <div className="order-card-footer-bar">
                   <div className="order-total-group">
-                    <span className="total-label-muted">Order Total:</span>
+                    <span className="total-label-muted">Total Paid:</span>
                     <span className="total-value-strong">
                       ₹{Number(order.totalAmount).toLocaleString('en-IN')}
                     </span>
                   </div>
                   <Link to={`/orders/${order._id}`} className="btn-view-invoice">
-                    View Details & Track →
+                    <span>View & Track Order</span>
+                    <ArrowRightIcon size={16} />
                   </Link>
                 </div>
               </div>

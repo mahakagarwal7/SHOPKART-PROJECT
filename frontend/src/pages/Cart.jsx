@@ -2,6 +2,17 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import CartItem from '../components/CartItem';
+import {
+  CartIcon,
+  ArrowRightIcon,
+  ArrowLeftIcon,
+  ShieldIcon,
+  TruckIcon,
+  RefreshIcon,
+  CheckIcon,
+} from '../components/Icons';
+
+const FREE_SHIPPING_THRESHOLD = 499;
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -91,17 +102,26 @@ export default function Cart() {
       <div className="storefront-cart-page">
         <div className="storefront-container" style={{ padding: '4rem 1.5rem' }}>
           <div className="state-container empty-cart-state">
-            <div className="empty-cart-icon">🛍️</div>
+            <div className="empty-cart-icon">
+              <CartIcon size={48} />
+            </div>
             <h2>Your Shopping Bag is Empty</h2>
             <p>Explore our curated collections and discover items you love.</p>
             <Link to="/products" className="btn-browse-empty">
-              Explore Catalog Now →
+              <span>Explore Catalog Now</span>
+              <ArrowRightIcon size={16} />
             </Link>
           </div>
         </div>
       </div>
     );
   }
+
+  const freeShippingProgress = Math.min(
+    100,
+    Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100)
+  );
+  const amountNeededForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
 
   return (
     <div className="storefront-cart-page">
@@ -120,8 +140,31 @@ export default function Cart() {
             </p>
           </div>
           <Link to="/products" className="btn-continue-shopping-pill">
-            ← Continue Shopping
+            <ArrowLeftIcon size={16} />
+            <span>Continue Shopping</span>
           </Link>
+        </div>
+
+        {/* Free Shipping Progress Strip (Conversion Booster) */}
+        <div className="shipping-progress-banner">
+          <div className="progress-banner-text">
+            {amountNeededForFreeShipping === 0 ? (
+              <span className="free-shipping-unlocked">
+                <CheckIcon size={16} />
+                <strong>Free Standard Delivery Unlocked!</strong> You qualify for free shipping across India.
+              </span>
+            ) : (
+              <span>
+                Add <strong>₹{amountNeededForFreeShipping.toLocaleString('en-IN')}</strong> more to unlock <strong>FREE Standard Delivery</strong>!
+              </span>
+            )}
+          </div>
+          <div className="progress-bar-track">
+            <div
+              className={`progress-bar-fill ${amountNeededForFreeShipping === 0 ? 'fill-complete' : ''}`}
+              style={{ width: `${freeShippingProgress}%` }}
+            ></div>
+          </div>
         </div>
 
         {notification && (
@@ -187,13 +230,15 @@ export default function Cart() {
                 </div>
                 <div className="summary-breakdown-row">
                   <span className="breakdown-label">Standard Shipping</span>
-                  <span className="breakdown-val text-shipping-free">FREE</span>
+                  <span className="breakdown-val text-shipping-free">
+                    {amountNeededForFreeShipping === 0 ? 'FREE' : '₹99'}
+                  </span>
                 </div>
                 <div className="summary-divider-line"></div>
                 <div className="summary-breakdown-row total-row">
                   <span className="total-label">Estimated Total</span>
                   <span className="total-amount-display">
-                    ₹{Number(subtotal).toLocaleString('en-IN')}
+                    ₹{Number(subtotal + (amountNeededForFreeShipping === 0 ? 0 : 99)).toLocaleString('en-IN')}
                   </span>
                 </div>
               </div>
@@ -203,20 +248,21 @@ export default function Cart() {
                 onClick={handleProceedToCheckout}
                 className="btn-checkout-primary"
               >
-                Proceed to Checkout →
+                <span>Proceed to Checkout</span>
+                <ArrowRightIcon size={16} />
               </button>
 
               <div className="summary-trust-perks">
                 <div className="trust-perk-item">
-                  <span>🔒</span>
+                  <ShieldIcon size={16} />
                   <span>256-Bit SSL Encrypted Razorpay Checkout</span>
                 </div>
                 <div className="trust-perk-item">
-                  <span>🚚</span>
-                  <span>Free Express Delivery across India</span>
+                  <TruckIcon size={16} />
+                  <span>Express Dispatch across all pin codes in India</span>
                 </div>
                 <div className="trust-perk-item">
-                  <span>↩️</span>
+                  <RefreshIcon size={16} />
                   <span>Hassle-Free 30-Day Return Guarantee</span>
                 </div>
               </div>

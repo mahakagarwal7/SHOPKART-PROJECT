@@ -2,6 +2,16 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useCart } from '../context/CartContext';
+import {
+  CartIcon,
+  HeartIcon,
+  SearchIcon,
+  UserIcon,
+  MenuIcon,
+  CloseIcon,
+  PackageIcon,
+  LockIcon,
+} from './Icons';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -11,6 +21,7 @@ export default function Navbar() {
   const [currentUser, setCurrentUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   // Fetch current customer profile if authenticated
@@ -49,6 +60,12 @@ export default function Navbar() {
     return () => {
       mounted = false;
     };
+  }, [location.pathname]);
+
+  // Close menus when route changes
+  useEffect(() => {
+    setAccountMenuOpen(false);
+    setMobileMenuOpen(false);
   }, [location.pathname]);
 
   // Close account dropdown when clicking outside
@@ -93,27 +110,32 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Preline Top Announcement Strip */}
-      <div className="storefront-announcement-bar">
-        <div className="storefront-container announcement-content">
-          <span>✨ <strong>Exclusive Storefront:</strong> Free standard shipping across India on orders over ₹499</span>
-          <span className="announcement-badge">Razorpay Test Mode Active</span>
-        </div>
-      </div>
-
-      {/* Main Preline Storefront Header */}
+      {/* Main Storefront Header */}
       <header className="storefront-navbar">
         <div className="storefront-container navbar-inner">
+          {/* Mobile Menu Toggle Button */}
+          <button
+            type="button"
+            className="mobile-menu-toggle-btn"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle navigation menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? <CloseIcon size={22} /> : <MenuIcon size={22} />}
+          </button>
+
           {/* Brand Logo */}
           <Link to="/home" className="storefront-logo">
-            <span className="logo-icon-box">🛒</span>
+            <div className="logo-icon-box">
+              <CartIcon size={20} className="logo-cart-svg" />
+            </div>
             <div className="logo-text-group">
               <span className="logo-title">ShopKart</span>
-              <span className="logo-subtitle">Storefront</span>
+              <span className="logo-subtitle">CURATED STORE</span>
             </div>
           </Link>
 
-          {/* Center Navigation Links */}
+          {/* Center Navigation Links (Desktop) */}
           <nav className="storefront-nav-links">
             <NavLink
               to="/home"
@@ -152,40 +174,50 @@ export default function Navbar() {
           {/* Quick Search Bar */}
           <form onSubmit={handleSearchSubmit} className="storefront-search-form">
             <div className="search-input-pill">
-              <span className="search-pill-icon">🔍</span>
+              <SearchIcon size={16} className="search-pill-icon" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products, brands..."
+                placeholder="Search products, brands, categories..."
                 className="search-pill-input"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="search-clear-btn"
+                  title="Clear search"
+                >
+                  <CloseIcon size={14} />
+                </button>
+              )}
             </div>
           </form>
 
           {/* Right Action Icons Group */}
           <div className="storefront-actions-group">
-            {/* Wishlist Icon Button with Badge */}
+            {/* Wishlist Icon Button with Animated Badge */}
             <Link
               to="/wishlist"
               className="action-icon-btn"
               title="View Wishlist"
               aria-label="Wishlist"
             >
-              <span className="icon-symbol">🤍</span>
+              <HeartIcon size={20} className="action-icon-svg" />
               {wishlistCount > 0 && (
                 <span className="action-counter-pill counter-red">{wishlistCount}</span>
               )}
             </Link>
 
-            {/* Cart Icon Button with Badge */}
+            {/* Cart Icon Button with Animated Badge */}
             <Link
               to="/cart"
               className="action-icon-btn cart-btn-action"
-              title="View Cart"
-              aria-label="Cart"
+              title="View Shopping Bag"
+              aria-label="Shopping Bag"
             >
-              <span className="icon-symbol">🛍️</span>
+              <CartIcon size={20} className="action-icon-svg" />
               {totalItems > 0 && (
                 <span className="action-counter-pill counter-blue">{totalItems}</span>
               )}
@@ -209,7 +241,7 @@ export default function Navbar() {
                     <div className="account-user-meta">
                       <span className="user-name">{currentUser.fullName}</span>
                       <span className="user-email">{currentUser.email}</span>
-                      <span className="customer-status-tag">Verified Customer</span>
+                      <span className="customer-status-tag">Verified Member</span>
                     </div>
 
                     <div className="dropdown-divider"></div>
@@ -220,21 +252,21 @@ export default function Navbar() {
                         onClick={() => setAccountMenuOpen(false)}
                         className="menu-item"
                       >
-                        👤 Account Dashboard
+                        <UserIcon size={16} /> Account Dashboard
                       </Link>
                       <Link
                         to="/orders"
                         onClick={() => setAccountMenuOpen(false)}
                         className="menu-item"
                       >
-                        📦 My Orders
+                        <PackageIcon size={16} /> My Orders
                       </Link>
                       <Link
                         to="/wishlist"
                         onClick={() => setAccountMenuOpen(false)}
                         className="menu-item"
                       >
-                        ❤️ Saved Items
+                        <HeartIcon size={16} /> Saved Items
                       </Link>
                     </div>
 
@@ -245,7 +277,7 @@ export default function Navbar() {
                       onClick={handleLogout}
                       className="menu-item menu-logout"
                     >
-                      🚪 Sign Out
+                      <LockIcon size={16} /> Sign Out
                     </button>
                   </div>
                 )}
@@ -262,6 +294,90 @@ export default function Navbar() {
             )}
           </div>
         </div>
+
+        {/* Mobile Slide-Down Drawer */}
+        {mobileMenuOpen && (
+          <div className="mobile-nav-drawer">
+            <div className="mobile-drawer-inner">
+              <form onSubmit={handleSearchSubmit} className="mobile-search-form">
+                <div className="search-input-pill">
+                  <SearchIcon size={16} className="search-pill-icon" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search products..."
+                    className="search-pill-input"
+                  />
+                </div>
+              </form>
+
+              <div className="mobile-drawer-links">
+                <NavLink
+                  to="/home"
+                  className={({ isActive }) =>
+                    isActive ? 'mobile-nav-link active' : 'mobile-nav-link'
+                  }
+                >
+                  Home
+                </NavLink>
+                <NavLink
+                  to="/products"
+                  className={({ isActive }) =>
+                    isActive ? 'mobile-nav-link active' : 'mobile-nav-link'
+                  }
+                >
+                  Catalog
+                </NavLink>
+                <NavLink
+                  to="/wishlist"
+                  className={({ isActive }) =>
+                    isActive ? 'mobile-nav-link active' : 'mobile-nav-link'
+                  }
+                >
+                  Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
+                </NavLink>
+                <NavLink
+                  to="/orders"
+                  className={({ isActive }) =>
+                    isActive ? 'mobile-nav-link active' : 'mobile-nav-link'
+                  }
+                >
+                  Orders
+                </NavLink>
+                <NavLink
+                  to="/cart"
+                  className={({ isActive }) =>
+                    isActive ? 'mobile-nav-link active' : 'mobile-nav-link'
+                  }
+                >
+                  Shopping Bag {totalItems > 0 && `(${totalItems})`}
+                </NavLink>
+              </div>
+
+              {currentUser ? (
+                <div className="mobile-drawer-user-section">
+                  <div className="mobile-user-info">
+                    <span className="user-name">{currentUser.fullName}</span>
+                    <span className="user-email">{currentUser.email}</span>
+                  </div>
+                  <button type="button" onClick={handleLogout} className="btn-mobile-logout">
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <div className="mobile-drawer-auth-buttons">
+                  <Link to="/login" className="btn-header-login" style={{ textAlign: 'center' }}>
+                    Sign In
+                  </Link>
+                  <Link to="/register" className="btn-header-register" style={{ textAlign: 'center' }}>
+                    Register
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </header>
     </>
   );

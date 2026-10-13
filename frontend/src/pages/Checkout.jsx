@@ -2,6 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
+import {
+  ShieldIcon,
+  CreditCardIcon,
+  LockIcon,
+  CheckIcon,
+  CloseIcon,
+  ArrowRightIcon,
+} from '../components/Icons';
 
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
@@ -259,9 +267,9 @@ export default function Checkout() {
             <span>/</span>
             <span className="current-crumb">Checkout</span>
           </div>
-          <h1 className="checkout-main-title">Fast Checkout</h1>
+          <h1 className="checkout-main-title">Express Checkout</h1>
           <p className="checkout-subtitle-text">
-            Enter your delivery details to complete your order securely
+            Enter your destination details to complete your order securely with Razorpay
           </p>
         </div>
 
@@ -277,7 +285,10 @@ export default function Checkout() {
           {/* Left Column: Shipping Address Form */}
           <div className="checkout-form-column">
             <div className="checkout-box-card">
-              <h2 className="box-card-title">📍 Shipping Information</h2>
+              <div className="box-card-header-flex">
+                <span className="step-pill">Step 1</span>
+                <h2 className="box-card-title">Shipping Address</h2>
+              </div>
 
               <form onSubmit={handlePlaceOrder} noValidate className="storefront-shipping-form">
                 <div className="form-group">
@@ -381,17 +392,26 @@ export default function Checkout() {
                   </div>
                 </div>
 
+                <div className="payment-security-notice">
+                  <ShieldIcon size={18} />
+                  <span>Your address is protected by ShopKart's 256-Bit SSL privacy encryption.</span>
+                </div>
+
                 <button
                   type="submit"
                   disabled={isSubmitting}
                   className="btn-pay-razorpay-primary"
                 >
                   {isSubmitting ? (
-                    <>
+                    <span className="loading-inline">
                       <span className="spinner-sm"></span> Processing Razorpay Order...
-                    </>
+                    </span>
                   ) : (
-                    <>💳 Pay with Razorpay • ₹{Number(subtotal).toLocaleString('en-IN')}</>
+                    <>
+                      <CreditCardIcon size={20} />
+                      <span>Pay with Razorpay • ₹{Number(subtotal).toLocaleString('en-IN')}</span>
+                      <ArrowRightIcon size={18} />
+                    </>
                   )}
                 </button>
               </form>
@@ -401,7 +421,10 @@ export default function Checkout() {
           {/* Right Column: Order Review Sidebar */}
           <div className="checkout-summary-column">
             <div className="storefront-review-card">
-              <h2 className="review-card-title">Order Review ({totalItems} items)</h2>
+              <div className="box-card-header-flex">
+                <span className="step-pill">Step 2</span>
+                <h2 className="review-card-title">Order Review ({totalItems} items)</h2>
+              </div>
 
               <div className="review-items-list-box">
                 {cartItems.map((item) => (
@@ -412,7 +435,8 @@ export default function Checkout() {
                       className="review-item-thumb"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=100&auto=format&fit=crop';
+                        e.target.src =
+                          'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=100&auto=format&fit=crop';
                       }}
                     />
                     <div className="review-item-meta">
@@ -449,7 +473,7 @@ export default function Checkout() {
               </div>
 
               <div className="review-security-banner">
-                <span>🔒</span>
+                <LockIcon size={16} />
                 <span>256-Bit SSL Encrypted Razorpay Test Checkout</span>
               </div>
             </div>
@@ -461,18 +485,26 @@ export default function Checkout() {
           <div className="modal-backdrop">
             <div className="modal-card">
               <div className="modal-header">
-                <h3>💳 Razorpay Test Mode Checkout</h3>
+                <div className="modal-title-row">
+                  <CreditCardIcon size={22} />
+                  <h3>Razorpay Test Mode Checkout</h3>
+                </div>
               </div>
               <div className="modal-body">
-                <p>
-                  <strong>ShopKart Order ID:</strong> {offlineModalData.shopKartOrderId}
-                </p>
-                <p>
-                  <strong>Total Amount:</strong> ₹
-                  {Number(offlineModalData.amount / 100).toLocaleString('en-IN')}
-                </p>
+                <div className="modal-info-box">
+                  <div className="info-line">
+                    <span>Order Reference:</span>
+                    <strong>#{offlineModalData.shopKartOrderId}</strong>
+                  </div>
+                  <div className="info-line">
+                    <span>Payable Amount:</span>
+                    <strong className="text-blue">
+                      ₹{Number(offlineModalData.amount / 100).toLocaleString('en-IN')}
+                    </strong>
+                  </div>
+                </div>
                 <p className="modal-hint">
-                  Simulating Razorpay Test Mode payment response for automated lab testing.
+                  Simulating Razorpay Test payment response for automated testing environments.
                 </p>
               </div>
               <div className="modal-actions">
@@ -481,14 +513,14 @@ export default function Checkout() {
                   className="btn-modal-success"
                   onClick={() => handleOfflineCompletePayment(true)}
                 >
-                  ✅ Simulate Successful Payment
+                  <CheckIcon size={16} /> Simulate Success
                 </button>
                 <button
                   type="button"
                   className="btn-modal-cancel"
                   onClick={() => handleOfflineCompletePayment(false)}
                 >
-                  ❌ Simulate Failed Payment
+                  <CloseIcon size={16} /> Cancel Payment
                 </button>
               </div>
             </div>

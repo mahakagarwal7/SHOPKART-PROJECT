@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useCart } from '../context/CartContext';
+import { HeartIcon, CartIcon, StarIcon, CheckIcon, ArrowRightIcon } from './Icons';
 
 export default function ProductCard({ product, initialWishlisted = false, onWishlistChange }) {
   const [isWishlisted, setIsWishlisted] = useState(initialWishlisted);
@@ -14,6 +15,10 @@ export default function ProductCard({ product, initialWishlisted = false, onWish
   const isCartLoading = actionLoadingId === product._id;
   const inCart = isInCart(product._id);
 
+  // Compute dummy original MRP to display discount tag like leading stores
+  const originalPrice = Math.round(product.price * 1.25);
+  const discountPercent = Math.round(((originalPrice - product.price) / originalPrice) * 100);
+
   const handleAddToCart = async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -24,14 +29,14 @@ export default function ProductCard({ product, initialWishlisted = false, onWish
     if (res.status === 401) {
       navigate('/login');
     } else if (res.success) {
-      setFeedbackMsg('Added to bag! 🛍️');
+      setFeedbackMsg('Added to bag!');
     } else {
       setFeedbackMsg(res.message || 'Unable to add to cart.');
     }
 
     setTimeout(() => {
       setFeedbackMsg('');
-    }, 2800);
+    }, 2500);
   };
 
   const handleWishlistToggle = async (e) => {
@@ -46,12 +51,12 @@ export default function ProductCard({ product, initialWishlisted = false, onWish
       if (isWishlisted) {
         await api.delete(`/wishlist/${product._id}`);
         setIsWishlisted(false);
-        setFeedbackMsg('Removed from wishlist');
+        setFeedbackMsg('Removed from saved items');
         if (onWishlistChange) onWishlistChange(product._id, false);
       } else {
         await api.post(`/wishlist/${product._id}`);
         setIsWishlisted(true);
-        setFeedbackMsg('Saved to wishlist ❤️');
+        setFeedbackMsg('Saved to wishlist!');
         if (onWishlistChange) onWishlistChange(product._id, true);
       }
     } catch (err) {
@@ -59,13 +64,13 @@ export default function ProductCard({ product, initialWishlisted = false, onWish
         navigate('/login');
       } else if (err.response?.status === 409) {
         setIsWishlisted(true);
-        setFeedbackMsg('Already in wishlist ❤️');
+        setFeedbackMsg('Already in wishlist');
       } else {
         setFeedbackMsg('Unable to update wishlist.');
       }
     } finally {
       setLoadingWishlist(false);
-      setTimeout(() => setFeedbackMsg(''), 2800);
+      setTimeout(() => setFeedbackMsg(''), 2500);
     }
   };
 
@@ -77,23 +82,27 @@ export default function ProductCard({ product, initialWishlisted = false, onWish
           <img
             src={product.image}
             alt={product.name}
+            loading="lazy"
             className="product-main-img"
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=500&auto=format&fit=crop';
+              e.target.src =
+                'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=500&auto=format&fit=crop';
             }}
           />
         </Link>
 
         {/* Top Badges */}
         <div className="stage-top-overlay">
-          {product.stock <= 5 && !isOutOfStock ? (
-            <span className="stage-badge badge-warning">⚡ Low Stock</span>
-          ) : isOutOfStock ? (
-            <span className="stage-badge badge-danger">Out of Stock</span>
-          ) : (
-            <span className="stage-badge badge-trending">🔥 Trending</span>
-          )}
+          <div className="stage-badges-left">
+            {product.stock <= 5 && !isOutOfStock ? (
+              <span className="stage-badge badge-warning">Low Stock</span>
+            ) : isOutOfStock ? (
+              <span className="stage-badge badge-danger">Out of Stock</span>
+            ) : (
+              <span className="stage-badge badge-discount">-{discountPercent}%</span>
+            )}
+          </div>
 
           {/* Floating Heart Wishlist Button */}
           <button
@@ -101,24 +110,31 @@ export default function ProductCard({ product, initialWishlisted = false, onWish
             onClick={handleWishlistToggle}
             disabled={loadingWishlist}
             className={`stage-heart-btn ${isWishlisted ? 'heart-active' : ''}`}
-            title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
+            title={isWishlisted ? 'Remove from Wishlist' : 'Save to Wishlist'}
             aria-label="Wishlist toggle"
           >
-            {loadingWishlist ? '⏳' : isWishlisted ? '❤️' : '🤍'}
+            <HeartIcon filled={isWishlisted} size={18} />
           </button>
         </div>
 
         {/* Quick View Floating Overlay on Hover */}
         <div className="stage-hover-overlay">
           <Link to={`/products/${product._id}`} className="btn-quick-view">
-            Quick Details →
+            <span>Quick View</span>
+            <ArrowRightIcon size={14} />
           </Link>
         </div>
       </div>
 
       {/* Card Content & Details */}
       <div className="card-body-content">
-        <div className="card-meta-category">{product.category}</div>
+        <div className="card-meta-row">
+          <span className="card-meta-category">{product.category}</span>
+          <div className="card-rating-mini">
+            <StarIcon size={13} filled={true} />
+            <span>4.9</span>
+          </div>
+        </div>
 
         <h3 className="card-product-title">
           <Link to={`/products/${product._id}`} title={product.name}>
@@ -128,7 +144,10 @@ export default function ProductCard({ product, initialWishlisted = false, onWish
 
         {/* Price & Stock info */}
         <div className="card-pricing-row">
-          <span className="price-amount">₹{Number(product.price).toLocaleString('en-IN')}</span>
+          <div className="pricing-group">
+            <span className="price-amount">₹{Number(product.price).toLocaleString('en-IN')}</span>
+            <span className="original-mrp-price">₹{Number(originalPrice).toLocaleString('en-IN')}</span>
+          </div>
           <span className="stock-hint">
             {isOutOfStock ? (
               <span className="text-out">Sold Out</span>
@@ -149,7 +168,10 @@ export default function ProductCard({ product, initialWishlisted = false, onWish
                 : 'feedback-pill-ok'
             }`}
           >
-            {feedbackMsg}
+            {feedbackMsg.includes('Added') || feedbackMsg.includes('Saved') ? (
+              <CheckIcon size={13} />
+            ) : null}
+            <span>{feedbackMsg}</span>
           </div>
         )}
 
@@ -162,13 +184,19 @@ export default function ProductCard({ product, initialWishlisted = false, onWish
             className={`btn-storefront-add ${inCart ? 'btn-in-bag' : ''}`}
           >
             {isOutOfStock ? (
-              'Unavailable'
+              'Sold Out'
             ) : isCartLoading ? (
-              '⏳ Adding...'
+              <span className="loading-inline">
+                <span className="spinner-sm"></span> Adding...
+              </span>
             ) : inCart ? (
-              '🛒 Add Another'
+              <>
+                <CheckIcon size={16} /> In Bag (+1)
+              </>
             ) : (
-              '🛒 Add to Bag'
+              <>
+                <CartIcon size={16} /> Add to Bag
+              </>
             )}
           </button>
         </div>

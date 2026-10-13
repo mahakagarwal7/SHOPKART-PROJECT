@@ -17,7 +17,7 @@ export default function Products() {
   const [search, setSearch] = useState(initialSearch);
   const [category, setCategory] = useState(initialCategory);
   const [sort, setSort] = useState('');
-  const [categories, setCategories] = useState(['Electronics', 'Fashion', 'Books', 'Home']);
+  const [categories, setCategories] = useState(['Electronics', 'Audio', 'Fashion', 'Books', 'Home']);
   const [wishlistIds, setWishlistIds] = useState(new Set());
 
   // Synchronize category or search change from URL params

@@ -2,31 +2,41 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import ProductCard from '../components/ProductCard';
+import {
+  ArrowRightIcon,
+  PackageIcon,
+  HeartIcon,
+  LockIcon,
+  CheckIcon,
+  TruckIcon,
+  ShieldIcon,
+  StarIcon,
+} from '../components/Icons';
 
 const CATEGORY_SHOWCASE = [
   {
     name: 'Electronics',
-    img: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?q=80&w=260&auto=format&fit=crop',
+    img: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?q=80&w=300&auto=format&fit=crop',
     subtitle: 'Gadgets & Tech',
   },
   {
     name: 'Fashion',
-    img: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=260&auto=format&fit=crop',
+    img: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=300&auto=format&fit=crop',
     subtitle: 'Apparel & Style',
   },
   {
     name: 'Home',
-    img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=260&auto=format&fit=crop',
+    img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=300&auto=format&fit=crop',
     subtitle: 'Living & Comfort',
   },
   {
     name: 'Books',
-    img: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=260&auto=format&fit=crop',
+    img: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=300&auto=format&fit=crop',
     subtitle: 'Knowledge & Reads',
   },
   {
     name: 'Audio',
-    img: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=260&auto=format&fit=crop',
+    img: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=300&auto=format&fit=crop',
     subtitle: 'Headphones & Gear',
   },
 ];
@@ -38,7 +48,7 @@ export default function Home() {
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [wishlistIds, setWishlistIds] = useState(new Set());
 
-  // Password change state (Lab 01/02 Bonus)
+  // Password change state
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwords, setPasswords] = useState({ oldPassword: '', newPassword: '' });
   const [pwdMsg, setPwdMsg] = useState({ error: '', success: '' });
@@ -58,7 +68,6 @@ export default function Home() {
       })
       .catch(() => {
         if (mounted) {
-          // If not logged in -> redirect to login
           navigate('/login', { replace: true });
         }
       });
@@ -155,20 +164,23 @@ export default function Home() {
         <div className="storefront-container hero-inner-grid">
           <div className="hero-content-col">
             <div className="hero-pill-badge">
-              <span>🚀 2026 Collection Live</span>
+              <span className="badge-pulse-dot"></span>
+              <span>2026 Curated Collection</span>
             </div>
             <h1 className="hero-headline">
               Curated Essentials for <span>Modern Living</span>
             </h1>
             <p className="hero-subtext">
-              Discover verified quality electronics, lifestyle gear, and smart essentials. Enjoy instant checkout with Razorpay and free nationwide shipping.
+              Discover verified quality electronics, lifestyle gear, and smart essentials. Enjoy instant checkout with Razorpay and free nationwide express shipping.
             </p>
             <div className="hero-cta-group">
               <a href="#trending-section" className="btn-hero-primary">
-                🔥 Explore Trending
+                <span>Explore Trending</span>
+                <ArrowRightIcon size={16} />
               </a>
               <Link to="/products" className="btn-hero-secondary">
-                📦 All Products →
+                <span>All Products</span>
+                <ArrowRightIcon size={16} />
               </Link>
             </div>
 
@@ -186,7 +198,7 @@ export default function Home() {
               <div className="stat-divider"></div>
               <div className="stat-item">
                 <span className="stat-number">24/7</span>
-                <span className="stat-label">Customer Care</span>
+                <span className="stat-label">Customer Support</span>
               </div>
             </div>
           </div>
@@ -202,7 +214,7 @@ export default function Home() {
                 <div className="floating-card-icon">⚡</div>
                 <div>
                   <span className="floating-card-title">Flash Offer Active</span>
-                  <span className="floating-card-sub">Extra 15% off on Electronics</span>
+                  <span className="floating-card-sub">Free shipping on orders above ₹499</span>
                 </div>
               </div>
             </div>
@@ -216,10 +228,11 @@ export default function Home() {
           <div className="section-header-row">
             <div>
               <h2 className="section-title-clean">Explore Top Categories</h2>
-              <p className="section-subtitle-clean">Browse our top selected departments</p>
+              <p className="section-subtitle-clean">Browse our curated departments</p>
             </div>
             <Link to="/products" className="link-view-all">
-              View All Categories →
+              <span>View All</span>
+              <ArrowRightIcon size={15} />
             </Link>
           </div>
 
@@ -241,18 +254,56 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Modern Bento Highlights Banner */}
+      <section className="storefront-bento-section">
+        <div className="storefront-container">
+          <div className="bento-grid">
+            <div className="bento-card bento-card-large">
+              <div className="bento-content">
+                <span className="bento-tag">Featured Tech</span>
+                <h3>High-Fidelity Audio & Workstations</h3>
+                <p>Engineered for seamless productivity and immersive sound.</p>
+                <Link to="/products?category=Electronics" className="bento-link">
+                  Shop Electronics <ArrowRightIcon size={15} />
+                </Link>
+              </div>
+              <div className="bento-bg-accent"></div>
+            </div>
+
+            <div className="bento-card bento-card-medium">
+              <div className="bento-content">
+                <span className="bento-tag">Everyday Style</span>
+                <h3>Premium Modern Fashion</h3>
+                <p>Minimalist tailoring for work and weekend comfort.</p>
+                <Link to="/products?category=Fashion" className="bento-link">
+                  Explore Apparel <ArrowRightIcon size={15} />
+                </Link>
+              </div>
+            </div>
+
+            <div className="bento-card bento-card-small">
+              <div className="bento-content">
+                <span className="bento-tag">Instant Delivery</span>
+                <h3>Free Express Shipping</h3>
+                <p>Guaranteed on orders over ₹499 with live tracking.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Trending Now Section with Live Products */}
       <section id="trending-section" className="storefront-trending-section">
         <div className="storefront-container">
           <div className="trending-header-row">
             <div>
-              <span className="trending-eyebrow">🔥 Handpicked Highlights</span>
+              <span className="trending-eyebrow">Handpicked Highlights</span>
               <h2 className="section-title-clean">Trending Now</h2>
             </div>
 
             {/* Filter Tabs */}
             <div className="trending-tabs-pill-list">
-              {['All', 'Electronics', 'Fashion', 'Home', 'Books'].map((tab) => (
+              {['All', 'Electronics', 'Audio', 'Fashion', 'Home', 'Books'].map((tab) => (
                 <button
                   key={tab}
                   type="button"
@@ -306,13 +357,14 @@ export default function Home() {
 
           <div className="trending-bottom-cta">
             <Link to="/products" className="btn-explore-catalog-wide">
-              Explore All Products in Catalog →
+              <span>Explore All Products in Catalog</span>
+              <ArrowRightIcon size={16} />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Authenticated Customer Account Hub (Lab 01 & 02 Integration) */}
+      {/* Authenticated Customer Account Hub */}
       {user && (
         <section className="storefront-account-hub">
           <div className="storefront-container">
@@ -324,17 +376,17 @@ export default function Home() {
                 </div>
                 <div className="hub-quick-buttons">
                   <Link to="/orders" className="btn-hub-action">
-                    📦 My Orders
+                    <PackageIcon size={16} /> My Orders
                   </Link>
                   <Link to="/wishlist" className="btn-hub-action">
-                    ❤️ Wishlist
+                    <HeartIcon size={16} /> Wishlist
                   </Link>
                   <button
                     type="button"
                     onClick={() => setShowPasswordForm(!showPasswordForm)}
                     className="btn-hub-action"
                   >
-                    🔒 {showPasswordForm ? 'Hide Password Form' : 'Change Password'}
+                    <LockIcon size={16} /> {showPasswordForm ? 'Hide Form' : 'Change Password'}
                   </button>
                 </div>
               </div>
@@ -347,7 +399,7 @@ export default function Home() {
 
                   {pwdMsg.success && (
                     <div className="alert alert-success" style={{ marginBottom: '1rem' }}>
-                      <span>✅</span>
+                      <CheckIcon size={16} />
                       <span>{pwdMsg.success}</span>
                     </div>
                   )}

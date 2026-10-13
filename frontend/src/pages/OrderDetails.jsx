@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../services/api';
+import {
+  PackageIcon,
+  TruckIcon,
+  CheckIcon,
+  CreditCardIcon,
+  ArrowLeftIcon,
+  ShieldIcon,
+} from '../components/Icons';
 
 const ORDER_STEPS = ['PLACED', 'CONFIRMED', 'SHIPPED', 'DELIVERED'];
 
@@ -39,7 +47,7 @@ export default function OrderDetails() {
     fetchOrder();
   }, [id]);
 
-  // Bonus Challenge: Order status progression updater
+  // Order status progression updater
   const handleUpdateStatus = async (newStatus) => {
     setStatusUpdating(true);
     setNotice('');
@@ -78,7 +86,8 @@ export default function OrderDetails() {
           <h2>Unable to Load Order</h2>
           <p>{error || 'Order not found.'}</p>
           <Link to="/orders" className="btn-back">
-            ← Back to My Orders
+            <ArrowLeftIcon size={16} />
+            <span>Back to My Orders</span>
           </Link>
         </div>
       </div>
@@ -125,14 +134,18 @@ export default function OrderDetails() {
 
           {notice && (
             <div className="alert alert-info" style={{ marginTop: '1rem' }}>
-              <span>ℹ️</span>
+              <CheckIcon size={16} />
               <span>{notice}</span>
             </div>
           )}
 
           {/* Delivery Progress Timeline */}
           <div className="delivery-timeline-card">
-            <h3 className="timeline-title">Delivery Status Timeline</h3>
+            <div className="timeline-header-flex">
+              <TruckIcon size={20} />
+              <h3 className="timeline-title">Live Delivery Status Timeline</h3>
+            </div>
+
             <div className="timeline-steps-track">
               {ORDER_STEPS.map((step, idx) => {
                 const isCompleted = currentStepIndex >= idx;
@@ -145,16 +158,18 @@ export default function OrderDetails() {
                       isCurrent ? 'node-current' : ''
                     }`}
                   >
-                    <div className="step-circle">{isCompleted ? '✓' : idx + 1}</div>
+                    <div className="step-circle">
+                      {isCompleted ? <CheckIcon size={14} /> : idx + 1}
+                    </div>
                     <span className="step-text">{step}</span>
                   </div>
                 );
               })}
             </div>
 
-            {/* Bonus Challenge: Admin/Dev status advancement dropdown */}
+            {/* Admin / Dev status progression controls */}
             <div className="timeline-admin-control">
-              <span className="admin-control-label">Demo Status Progression (+10 Marks):</span>
+              <span className="admin-control-label">Demo Status Progression:</span>
               <div className="admin-buttons-row">
                 {ORDER_STEPS.map((step) => (
                   <button
@@ -175,7 +190,7 @@ export default function OrderDetails() {
           <div className="order-details-content-grid">
             {/* Left: Ordered Items Snapshot */}
             <div className="order-items-table-card">
-              <h3 className="card-subheading">Ordered Items Snapshot</h3>
+              <h3 className="card-subheading">Purchased Items ({order.items.length})</h3>
               <div className="items-snapshot-list">
                 {order.items.map((item, idx) => (
                   <div key={idx} className="snapshot-item-card">
@@ -185,7 +200,8 @@ export default function OrderDetails() {
                       className="snapshot-item-img"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=120&auto=format&fit=crop';
+                        e.target.src =
+                          'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=120&auto=format&fit=crop';
                       }}
                     />
                     <div className="snapshot-item-details">
@@ -205,7 +221,7 @@ export default function OrderDetails() {
             {/* Right: Shipping & Invoice Summary */}
             <div className="order-sidebar-meta">
               <div className="meta-box-card">
-                <h3 className="card-subheading">📍 Delivery Address</h3>
+                <h3 className="card-subheading">📍 Destination Address</h3>
                 <div className="address-text-block">
                   <p className="recipient-name">{order.shippingAddress.fullName}</p>
                   <p>{order.shippingAddress.addressLine1}</p>
@@ -232,7 +248,7 @@ export default function OrderDetails() {
                   </div>
                   {order.razorpayOrderId && (
                     <div className="payment-meta-row">
-                      <span>Razorpay Order ID:</span>
+                      <span>Razorpay Order:</span>
                       <span className="code-pill">{order.razorpayOrderId}</span>
                     </div>
                   )}
@@ -246,19 +262,19 @@ export default function OrderDetails() {
               </div>
 
               <div className="meta-box-card">
-                <h3 className="card-subheading">🧾 Invoice Summary</h3>
+                <h3 className="card-subheading">🧾 Order Summary</h3>
                 <div className="invoice-rows-list">
                   <div className="invoice-row">
-                    <span>Subtotal</span>
+                    <span>Items Subtotal</span>
                     <span>₹{Number(order.totalAmount).toLocaleString('en-IN')}</span>
                   </div>
                   <div className="invoice-row">
-                    <span>Shipping</span>
+                    <span>Standard Shipping</span>
                     <span className="text-shipping-free">FREE</span>
                   </div>
                   <div className="summary-divider-line"></div>
                   <div className="invoice-row total-row">
-                    <span>Total Paid</span>
+                    <span>Total Amount Paid</span>
                     <span className="invoice-total-amount">
                       ₹{Number(order.totalAmount).toLocaleString('en-IN')}
                     </span>

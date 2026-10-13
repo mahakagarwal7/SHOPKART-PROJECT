@@ -1,4 +1,5 @@
 import React from 'react';
+import { SearchIcon, CloseIcon } from './Icons';
 
 export default function SearchBar({
   search,
@@ -7,16 +8,16 @@ export default function SearchBar({
   onCategoryChange,
   sort,
   onSortChange,
-  categories = ['Electronics', 'Fashion', 'Books', 'Home']
+  categories = ['Electronics', 'Audio', 'Fashion', 'Books', 'Home']
 }) {
   return (
     <div className="storefront-toolbar">
       {/* Search Input Box */}
       <div className="toolbar-search-box">
-        <span className="search-icon-symbol">🔍</span>
+        <SearchIcon size={18} className="search-icon-symbol" />
         <input
           type="text"
-          placeholder="Search by product name, category..."
+          placeholder="Search by product name, category, brand..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           className="toolbar-search-input"
@@ -28,7 +29,7 @@ export default function SearchBar({
             onClick={() => onSearchChange('')}
             title="Clear search"
           >
-            ✕
+            <CloseIcon size={14} />
           </button>
         )}
       </div>
@@ -62,7 +63,7 @@ export default function SearchBar({
           className="toolbar-sort-select"
           title="Sort catalog"
         >
-          <option value="">Featured / Default</option>
+          <option value="">Featured / Relevance</option>
           <option value="price_asc">Price: Low to High (₹ ↑)</option>
           <option value="price_desc">Price: High to Low (₹ ↓)</option>
         </select>
