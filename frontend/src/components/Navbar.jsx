@@ -16,7 +16,7 @@ import {
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { totalItems } = useCart();
+  const { totalItems, resetCart } = useCart();
   const [wishlistCount, setWishlistCount] = useState(0);
   const [currentUser, setCurrentUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,7 +35,11 @@ export default function Navbar() {
         }
       })
       .catch(() => {
-        if (mounted) setCurrentUser(null);
+        if (mounted) {
+          setCurrentUser(null);
+          setWishlistCount(0);
+          resetCart();
+        }
       });
 
     return () => {
@@ -46,6 +50,10 @@ export default function Navbar() {
   // Fetch dynamic wishlist count
   useEffect(() => {
     let mounted = true;
+    if (!currentUser) {
+      setWishlistCount(0);
+      return;
+    }
     api
       .get('/wishlist/count')
       .then((res) => {
@@ -60,7 +68,7 @@ export default function Navbar() {
     return () => {
       mounted = false;
     };
-  }, [location.pathname]);
+  }, [location.pathname, currentUser]);
 
   // Close menus when route changes
   useEffect(() => {
@@ -86,6 +94,8 @@ export default function Navbar() {
       console.error('Logout error:', err);
     } finally {
       localStorage.removeItem('shopkart_token');
+      resetCart();
+      setWishlistCount(0);
       setCurrentUser(null);
       setAccountMenuOpen(false);
       navigate('/login');
@@ -206,7 +216,7 @@ export default function Navbar() {
               aria-label="Wishlist"
             >
               <HeartIcon size={20} className="action-icon-svg" />
-              {wishlistCount > 0 && (
+              {currentUser && wishlistCount > 0 && (
                 <span className="action-counter-pill counter-red">{wishlistCount}</span>
               )}
             </Link>
@@ -219,7 +229,7 @@ export default function Navbar() {
               aria-label="Shopping Bag"
             >
               <CartIcon size={20} className="action-icon-svg" />
-              {totalItems > 0 && (
+              {currentUser && totalItems > 0 && (
                 <span className="action-counter-pill counter-blue">{totalItems}</span>
               )}
             </Link>
@@ -336,7 +346,7 @@ export default function Navbar() {
                     isActive ? 'mobile-nav-link active' : 'mobile-nav-link'
                   }
                 >
-                  Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
+                  Wishlist {currentUser && wishlistCount > 0 && `(${wishlistCount})`}
                 </NavLink>
                 <NavLink
                   to="/orders"
@@ -352,7 +362,7 @@ export default function Navbar() {
                     isActive ? 'mobile-nav-link active' : 'mobile-nav-link'
                   }
                 >
-                  Shopping Bag {totalItems > 0 && `(${totalItems})`}
+                  Shopping Bag {currentUser && totalItems > 0 && `(${totalItems})`}
                 </NavLink>
               </div>
 

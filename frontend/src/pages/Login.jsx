@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import api from '../services/api';
+import { useCart } from '../context/CartContext';
 import {
   CartIcon,
   LockIcon,
@@ -18,6 +19,7 @@ import {
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { fetchCart } = useCart();
 
   const [form, setForm] = useState({
     email: location.state?.email || '',
@@ -59,6 +61,7 @@ export default function Login() {
       if (res.data?.token) {
         localStorage.setItem('shopkart_token', res.data.token);
       }
+      fetchCart();
       setSuccessMessage('Login successful! Redirecting to storefront...');
       setTimeout(() => {
         navigate('/home', { replace: true });

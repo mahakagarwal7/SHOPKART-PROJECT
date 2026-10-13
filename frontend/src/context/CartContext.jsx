@@ -100,6 +100,12 @@ export function CartProvider({ children }) {
     }
   };
 
+  // Reset in-memory cart state (e.g. on customer logout) without wiping DB
+  const resetCart = () => {
+    setCartItems([]);
+    setError('');
+  };
+
   // Derived Values
   const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
@@ -129,6 +135,7 @@ export function CartProvider({ children }) {
         isInCart,
         getItemQuantity,
         fetchCart,
+        resetCart,
         addToCart,
         updateQuantity,
         removeFromCart,
