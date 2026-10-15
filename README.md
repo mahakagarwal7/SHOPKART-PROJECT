@@ -707,8 +707,3 @@ The frontend includes a configured `frontend/vercel.json` to handle Single Page 
 - **Project Repository**: [SHOPKART-PROJECT on GitHub](https://github.com/mahakagarwal7/SHOPKART-PROJECT)
 - **License**: This project is licensed under the **ISC License**.
 
----
-
-<p align="center">
-  <b>ShopKart</b> — Crafted with ❤️ for Modern Web Engineering & E-Commerce Excellence.
-</p>
